@@ -1,0 +1,134 @@
+{
+  "brand": {
+    "name": "ZHUJIAN",
+    "slogan": "The universe sees your inner light"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "testimonials": "Testimonials",
+    "createBracelet": "Create Bracelet"
+  },
+  "home": {
+    "hero": {
+      "title": "Solunar",
+      "description": "Create your personalized crystal bracelet based on your birth details and personal preferences, resonating with the energy of the universe."
+    },
+    "cta": {
+      "create": "Create Your Bracelet"
+    },
+    "process": {
+      "title": "The Process",
+      "description": "Our personalized crystal bracelets are created through a thoughtful process designed to connect with your unique energy.",
+      "steps": {
+        "1": {
+          "title": "Personal Details",
+          "description": "Enter your name, birth date, and location to help us understand your cosmic energy."
+        },
+        "2": {
+          "title": "Questionnaire",
+          "description": "Answer a few simple questions to help us determine which crystals resonate with you."
+        },
+        "3": {
+          "title": "Your Bracelet",
+          "description": "Receive your personalized crystal bracelet design and place your order."
+        }
+      }
+    },
+    "story": {
+      "title": "Brand Story",
+      "subtitle": "The sun gives courage, the moon replenishes spirit",
+      "content1": "We believe everyone can become their own energy center",
+      "content2": "Solunar interprets ancient wisdom through modern design, tracing the sun's driving force, the moon's intuition, and the stars' guidance with you",
+      "content3": "We don't create illusory wishing wells, we only provide visible formulas for change"
+    },
+    "crystalConnection": {
+      "title": "Crystal Energy Connection",
+      "description": "Each crystal possesses unique properties and energies that can enhance different aspects of your life. Our algorithm matches your personal information with the perfect combination of crystals to support your journey.",
+      "cta": "Begin Your Journey"
+    },
+    "discover": {
+      "title": "Discover Your Crystal Harmony",
+      "description": "Your perfect crystal bracelet is waiting to be created. Start your journey now and trace the energy of the universe."
+    }
+  },
+  "about": {
+    "title": "About Solunar",
+    "brandStory": {
+      "title": "Brand Story",
+      "subtitle": "The sun gives courage, the moon replenishes spirit",
+      "imageAlt": "Solunar brand story",
+      "content1": "We believe that everyone can become their own energy center. In this fast-paced world, we often forget our connection with nature and the universe, which is the source of our inner strength.",
+      "content2": "Solunar interprets ancient wisdom through modern design, tracing the sun's driving force, the moon's intuition, and the stars' guidance with you. Each of our crystal bracelets is carefully designed to perfectly blend ancient energy studies with modern aesthetics.",
+      "content3": "We don't create illusory wishing wells; we only provide visible formulas for change. Every crystal is carefully selected, and every design has its unique energy significance, helping you find balance and harmony in your daily life."
+    },
+    "energyTypes": {
+      "sun": {
+        "symbol": "Sun",
+        "title": "Solar Energy",
+        "description": "Represents drive, courage, and confidence. Solar energy helps you express yourself, pursue goals, and ignite your inner flame."
+      },
+      "moon": {
+        "symbol": "Moon",
+        "title": "Lunar Energy",
+        "description": "Represents intuition, emotions, and inner wisdom. Lunar energy helps you connect with your inner self, listen to your intuition, and cultivate emotional intelligence."
+      },
+      "stars": {
+        "symbol": "Stars",
+        "title": "Stellar Energy",
+        "description": "Represents guidance, inspiration, and vision. Stellar energy helps you find direction, gain inspiration, and see broader possibilities."
+      }
+    },
+    "cta": "Create Your Personal Bracelet"
+  },
+  "testimonials": {
+    "title": "Customer Testimonials",
+    "description": "Hear how our customers connect with universal energy and find inner balance through Solunar crystal bracelets.",
+    "list": [
+      {
+        "name": "Li Ming",
+        "location": "Shanghai",
+        "quote": "Since wearing Solunar's crystal bracelet, I feel my energy is more balanced, and my decision-making at work has become clearer. The sun crystal really gave me strength!",
+        "image": "/placeholder.svg?height=100&width=100"
+      },
+      {
+        "name": "Wang Fang",
+        "location": "Beijing",
+        "quote": "The moon crystal bracelet helped me connect with my inner voice, and my intuition has become more acute. Every time I face difficulties, touching the bracelet brings me peace.",
+        "image": "/placeholder.svg?height=100&width=100"
+      },
+      {
+        "name": "Zhang Wei",
+        "location": "Guangzhou",
+        "quote": "Solunar's customization process is very professional. The bracelet designed based on my birth information perfectly matches my energy. After wearing it, I feel more confident.",
+        "image": "/placeholder.svg?height=100&width=100"
+      },
+      {
+        "name": "Liu Yun",
+        "location": "Chengdu",
+        "quote": "I was originally skeptical about crystal energy, but Solunar changed my mind. This is not an illusory wish, but a real energy connection.",
+        "image": "/placeholder.svg?height=100&width=100"
+      },
+      {
+        "name": "Chen Xiao",
+        "location": "Hangzhou",
+        "quote": "The stellar crystal bracelet helped me find direction during my career transition. Whenever I feel lost, it's like a guiding light.",
+        "image": "/placeholder.svg?height=100&width=100"
+      },
+      {
+        "name": "Zhao Lin",
+        "location": "Shenzhen",
+        "quote": "As a designer, I really appreciate Solunar's combination of ancient wisdom and modern design. It's not just an energy tool, but also a fashion accessory.",
+        "image": "/placeholder.svg?height=100&width=100"
+      }
+    ],
+    "cta": "Create Your Personal Bracelet"
+  },
+  "footer": {
+    "rights": "All rights reserved"
+  },
+  "announcement": {
+    "message": "Free shipping on all orders over ¥500 | Every bracelet is energetically cleansed"
+  }
+}
+

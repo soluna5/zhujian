@@ -1,0 +1,659 @@
+        }
+      }
+      
+      // 加上优先级分数
+      score += crystal.functionalAttributes?.priority || 0;
+      
+      // 如果这个石头已经被选为命运石，给它一个很大的负分
+      if (selectedStones.some(s => s.id === crystal.id)) {
+        score = -1000;
+      }
+      
+      return { crystal, score, role: 'functional' as const };
+    });
+    
+    // 按分数降序排序
+    functionalScores.sort((a, b) => b.score - a.score);
+    
+    // 打印所有功能石的分数，用于调试
+    console.log("Functional stone scores:");
+    functionalScores.slice(0, 5).forEach(item => {
+      console.log(`${item.crystal.name}: ${item.score} (primary purposes: ${Object.entries(item.crystal.functionalAttributes?.primaryPurposes || {}).filter(([_, v]) => v).map(([k]) => k).join(', ')}, impressions: ${Object.entries(item.crystal.functionalAttributes?.impressions || {}).filter(([_, v]) => v).map(([k]) => k).join(', ')})`);
+    });
+    
+    // 选择分数最高的功能石，且与命运石不同
+    const selectedFunctionalStone = functionalScores[0]?.crystal;
+    if (selectedFunctionalStone) {
+      selectedStones.push(selectedFunctionalStone);
+      console.log("Selected functional stone:", selectedFunctionalStone.name, "with score:", functionalScores[0]?.score);
+    } else {
+      console.error("Failed to select a functional stone!");
+    }
+    
+    // 第三步：选择修正石 - 基于修正需求和内在潜能
+    console.log("=== SELECTING CORRECTIVE STONE ===");
+    
+    // 为每个石头计算修正匹配分数
+    const correctiveScores = allCrystals.map((crystal: Crystal) => {
+      let score = 0;
+      
+      // 检查石头的修正属性是否匹配修正需求
+      if (crystal.correctiveAttributes?.correctiveProperties) {
+        formData.correctiveSituations.forEach(need => {
+          const key = correctiveToKeyMap[need];
+          if (key && crystal.correctiveAttributes.correctiveProperties[key]) {
+            score += 10; // 每匹配一个修正需求加10分
+          }
+        });
+      }
+      
+      // 检查石头的内在潜能是否匹配用户选择
+      if (crystal.correctiveAttributes?.potentials && formData.potential) {
+        const key = potentialToKeyMap[formData.potential];
+        if (key && crystal.correctiveAttributes.potentials[key]) {
+          score += 15; // 匹配内在潜能加15分，权重更高
+        }
+      }
+      
+      // 加上优先级分数
+      score += crystal.correctiveAttributes?.priority || 0;
+      
+      // 如果这个石头已经被选为命运石或功能石，给它一个很大的负分
+      if (selectedStones.some(s => s.id === crystal.id)) {
+        score = -1000;
+      }
+      
+      return { crystal, score, role: 'corrective' as const };
+    });
+    
+    // 按分数降序排序
+    correctiveScores.sort((a, b) => b.score - a.score);
+    
+    // 打印所有修正石的分数，用于调试
+    console.log("Corrective stone scores:");
+    correctiveScores.slice(0, 5).forEach(item => {
+      console.log(`${item.crystal.name}: ${item.score} (corrective properties: ${Object.entries(item.crystal.correctiveAttributes?.correctiveProperties || {}).filter(([_, v]) => v).map(([k]) => k).join(', ')}, potentials: ${Object.entries(item.crystal.correctiveAttributes?.potentials || {}).filter(([_, v]) => v).map(([k]) => k).join(', ')})`);
+    });
+    
+    // 选择分数最高的修正石，且与命运石和功能石不同
+    const selectedCorrectiveStone = correctiveScores[0]?.crystal;
+    if (selectedCorrectiveStone) {
+      selectedStones.push(selectedCorrectiveStone);
+      console.log("Selected corrective stone:", selectedCorrectiveStone.name, "with score:", correctiveScores[0]?.score);
+    } else {
+      console.error("Failed to select a corrective stone!");
+    }
+    
+    // 打印最终选择的三种石头
+    console.log("=== FINAL SELECTION ===");
+    console.log("Destiny stone:", selectedDestinyStone?.name);
+    console.log("Functional stone:", selectedFunctionalStone?.name);
+    console.log("Corrective stone:", selectedCorrectiveStone?.name);
+    
+    // 生成珠子
+    const beads = generateBeads(braceletSize);
+    
+    // 返回手链数据
+    return {
+      crystals: [selectedDestinyStone, selectedFunctionalStone, selectedCorrectiveStone].filter(Boolean) as Crystal[],
+      properties: [
+        { title: "命运石", description: selectedDestinyStone?.description || "" },
+        { title: "功能石", description: selectedFunctionalStone?.description || "" },
+        { title: "修正石", description: selectedCorrectiveStone?.description || "" }
+      ],
+      imageUrl: "/images/bracelet-preview.jpg",
+      size: braceletSize,
+      crystalImages: [
+        selectedDestinyStone?.images.round || "",
+        selectedFunctionalStone?.images.round || "",
+        selectedCorrectiveStone?.images.round || ""
+      ]
+    };
+  };
+
+  // 实现精简版的最优石头选择策略
+  const selectOptimalCrystal = (
+    candidates: Crystal[], 
+    userNeeds: string[],
+    impression: string,
+    potential: string,
+    selectedCrystals: Crystal[] = []
+  ): Crystal | null => {
+    if (candidates.length === 0) return null;
+    
+    // 计算每个候选石头的分数
+    const scoredCandidates = candidates.map(crystal => {
+      let score = 0;
+      
+      // 检查是否与已选石头冲突
+      if (selectedCrystals.some(selected => hasConflict(crystal, selected))) {
+        return { crystal, score: -1000 }; // 如果冲突，给一个很大的负分
+      }
+      
+      // 检查功能匹配度
+      if (crystal.functionalAttributes?.primaryPurposes) {
+        userNeeds.forEach(need => {
+          const key = needToKeyMap[need];
+          if (key && crystal.functionalAttributes.primaryPurposes[key]) {
+            score += 10;
+          }
+        });
+      }
+      
+      // 检查初印象匹配度
+      if (crystal.functionalAttributes?.impressions && impression) {
+        const key = impressionToKeyMap[impression];
+        if (key && crystal.functionalAttributes.impressions[key]) {
+          score += 15; // 匹配初印象加15分，权重更高
+        }
+      }
+      
+      // 检查内在潜能匹配度
+      if (crystal.correctiveAttributes?.potentials && potential) {
+        const key = potentialToKeyMap[potential];
+        if (key && crystal.correctiveAttributes.potentials[key]) {
+          score += 15; // 匹配内在潜能加15分，权重更高
+        }
+      }
+      
+      // 考虑优先级
+      score += crystal.functionalAttributes?.priority || 0;
+      score += crystal.correctiveAttributes?.priority || 0;
+      
+      return { crystal, score };
+    });
+    
+    // 按分数降序排序
+    scoredCandidates.sort((a, b) => b.score - a.score);
+    
+    // 返回分数最高的石头
+    return scoredCandidates[0]?.crystal || null;
+  };
+
+  // 辅助函数：检查两个石头是否有冲突
+  const hasConflict = (crystal1: Crystal, crystal2: Crystal): boolean => {
+    // 检查是否在不兼容列表中
+    if (crystal1.incompatibleWith && crystal1.incompatibleWith.includes(crystal2.name)) {
+      return true;
+    }
+    
+    if (crystal2.incompatibleWith && crystal2.incompatibleWith.includes(crystal1.name)) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  const validateStep = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        if (!formData.name || !formData.birthTime) {
+          toast({
+            title: "请填写完整信息",
+            description: "请确保您已填写姓名和出生时间。",
+            variant: "destructive",
+          });
+          return false;
+        }
+        return true;
+      case 2:
+        if (!formData.primaryNeed || !formData.correctiveSituation) {
+          toast({
+            title: "请回答所有问题",
+            description: "请确保您已回答所有问题。",
+            variant: "destructive",
+          });
+          return false;
+        }
+        return true;
+      case 3:
+        if (!formData.impression || !formData.potential) {
+          toast({
+            title: "请回答所有问题",
+            description: "请确保您已回答所有问题。",
+            variant: "destructive",
+          });
+          return false;
+        }
+        return true;
+      default:
+        return true;
+    }
+  };
+
+  return (
+    <main className="min-h-screen py-16">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="mb-12">
+          <h1 className="font-playfair text-3xl md:text-4xl text-center text-[#333333] mb-8">创建你的溯光水晶手链</h1>
+          <div className="flex justify-between items-center max-w-2xl mx-auto">
+            {steps.map((step, i) => (
+              <React.Fragment key={step.id}>
+                <div className="flex flex-col items-center">
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center mb-2",
+                      currentStep >= step.id
+                        ? "bg-[#333333] text-white"
+                        : "bg-white border border-[#cccccc] text-[#999999]"
+                    )}
+                  >
+                    {step.id}
+                  </div>
+                  <span className={cn("text-sm", currentStep >= step.id ? "text-[#333333]" : "text-[#999999]")}>
+                    {step.name}
+                  </span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={cn("flex-1 h-px mx-2", currentStep > i + 1 ? "bg-[#333333]" : "bg-[#cccccc]")} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <Card className="bg-white shadow-sm">
+          <CardContent className="p-8">
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <h2 className="font-playfair text-2xl text-[#333333] mb-6">个人信息</h2>
+                <p className="text-[#666666] mb-8">请提供你的个人信息，帮助我们创建一款与你能量共鸣的手链。</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="name" className="text-sm font-medium text-[#333333] mb-2 block">
+                      姓名
+                    </Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="border-[#cccccc] rounded-md"
+                      placeholder="请输入你的姓名"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="birthTime" className="text-sm font-medium text-[#333333] mb-2 block">
+                      出生时间（公历）
+                    </Label>
+                    <div className="space-y-2">
+                      <Input
+                        id="birthTime"
+                        name="birthTime"
+                        type="datetime-local"
+                        value={formData.birthTime}
+                        onChange={handleInputChange}
+                        className="border-[#cccccc] rounded-md"
+                        required
+                      />
+                      <p className="text-sm text-[#666666]">请填写公历出生时间，系统会自动转换为农历进行八字计算</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <h2 className="font-playfair text-2xl text-[#333333] mb-6">问卷调查</h2>
+                <p className="text-[#666666] mb-8">请回答这些问题，帮助我们了解你的需求和状态。</p>
+
+                <div className="space-y-8">
+                  <div className="mt-6 w-full max-w-md">
+                    <h3 className="text-xl font-bold mb-4">您的需求</h3>
+                    <RadioGroup
+                      value={formData.primaryNeed}
+                      onValueChange={(value) => handleSingleSelectChange('primaryNeed', value)}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="情感关系" id="relationship" />
+                        <Label htmlFor="relationship" className="flex-1 cursor-pointer">情感关系</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="财富增长" id="wealth" />
+                        <Label htmlFor="wealth" className="flex-1 cursor-pointer">财富增长</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="能量防护" id="protection" />
+                        <Label htmlFor="protection" className="flex-1 cursor-pointer">能量防护</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="身心平衡" id="balance" />
+                        <Label htmlFor="balance" className="flex-1 cursor-pointer">身心平衡</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="事业上升" id="career" />
+                        <Label htmlFor="career" className="flex-1 cursor-pointer">事业上升</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <div className="mt-6 w-full max-w-md">
+                    <h3 className="text-xl font-bold mb-4">您的修正情况</h3>
+                    <RadioGroup
+                      value={formData.correctiveSituation}
+                      onValueChange={(value) => handleSingleSelectChange('correctiveSituation', value)}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="改善决策犹豫" id="indecisive" />
+                        <Label htmlFor="indecisive" className="flex-1 cursor-pointer">改善决策犹豫</Label>
+                        </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="提升恢复能力" id="fatigue" />
+                        <Label htmlFor="fatigue" className="flex-1 cursor-pointer">提升恢复能力</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="减少人际消耗" id="socialDrain" />
+                        <Label htmlFor="socialDrain" className="flex-1 cursor-pointer">减少人际消耗</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="平衡能量敏感" id="energySensitive" />
+                        <Label htmlFor="energySensitive" className="flex-1 cursor-pointer">平衡能量敏感</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* 第三题：希望传递给世界的初印象 */}
+                  <div className="mt-6 w-full max-w-md">
+                    <h3 className="text-xl font-bold mb-4">您希望传递给世界的初印象是？</h3>
+                    <RadioGroup
+                      value={formData.impression}
+                      onValueChange={(value) => handleSingleSelectChange('impression', value)}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="warmth" id="warmth" />
+                        <Label htmlFor="warmth" className="flex-1 cursor-pointer">A如沐春风般的温暖亲和力</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="reliability" id="reliability" />
+                        <Label htmlFor="reliability" className="flex-1 cursor-pointer">B沉稳可靠的专业权威感</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="charisma" id="charisma" />
+                        <Label htmlFor="charisma" className="flex-1 cursor-pointer">C锋芒毕露的个人魅力值</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="insight" id="insight" />
+                        <Label htmlFor="insight" className="flex-1 cursor-pointer">D洞若观火的冷静洞察力</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* 第四题：渴望唤醒的内在潜能 */}
+                  <div className="mt-6 w-full max-w-md">
+                    <h3 className="text-xl font-bold mb-4">您一直渴望唤醒的内在潜能是？</h3>
+                    <RadioGroup
+                      value={formData.potential}
+                      onValueChange={(value) => handleSingleSelectChange('potential', value)}
+                      className="space-y-3"
+                    >
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="empathy" id="empathy" />
+                        <Label htmlFor="empathy" className="flex-1 cursor-pointer">A细腻共情力</Label>
+                        </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="decision" id="decision" />
+                        <Label htmlFor="decision" className="flex-1 cursor-pointer">B理性决策力</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="expression" id="expression" />
+                        <Label htmlFor="expression" className="flex-1 cursor-pointer">C卓越表达力</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="intuition" id="intuition" />
+                        <Label htmlFor="intuition" className="flex-1 cursor-pointer">D直觉敏锐度</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                        <RadioGroupItem value="efficiency" id="efficiency" />
+                        <Label htmlFor="efficiency" className="flex-1 cursor-pointer">E高效行动力</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                {showAnimation ? (
+                  <div className="flex flex-col items-center justify-center min-h-[600px]">
+                    <div className="relative w-full h-[500px]">
+                      <ComplexMagicAnimation
+                        selectedCrystals={[
+                          { name: "玫瑰石英", color: "#FFC0CB" },
+                          { name: "紫水晶", color: "#9370DB" },
+                          { name: "白水晶", color: "#FFFFFF" },
+                        ]}
+                      />
+                    </div>
+                    <h2 className="font-playfair text-2xl text-[#333333] mt-8">正在生成你的专属手链...</h2>
+                    <p className="text-[#666666] mt-4">我们正在为你挑选最合适的水晶组合</p>
+                  </div>
+                ) : bracelet ? (
+                  <>
+                <h2 className="font-playfair text-2xl text-[#333333] mb-6">你的水晶手链</h2>
+                <p className="text-[#666666] mb-8">
+                  基于你的个人信息和偏好，我们为你创建了完美的水晶手链，连接日月星辰的能量。
+                </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                  <Suspense fallback={<div className="w-full h-[400px] bg-gray-100 animate-pulse rounded-lg" />}>
+                          <BraceletViewer3D 
+                            size={braceletSize} 
+                            destinyStones={bracelet.crystals.filter(c => c.type === 'destiny')} 
+                            functionalStones={bracelet.crystals.filter(c => c.type === 'function')}
+                            correctiveStones={bracelet.crystals.filter(c => c.type === 'correction')}
+                          />
+                  </Suspense>
+
+                        <div className="mt-8 space-y-6">
+                  <div>
+                            <h4 className="font-medium mb-2">选择手链尺寸：</h4>
+                            <div className="flex space-x-2">
+                              {(["small", "medium", "large"] as BraceletSize[]).map((size) => (
+                                <button
+                                  key={size}
+                                  onClick={() => handleSizeChange(size as BraceletSize)}
+                                  className={`px-4 py-2 rounded ${
+                                    braceletSize === size ? "bg-[#333333] text-white" : "bg-gray-200 text-[#333333]"
+                                  }`}
+                                >
+                                  {size === "large" && "粗 (6.5mm+)"}
+                                  {size === "medium" && "中等 (3-6.5mm)"}
+                                  {size === "small" && "细 (3mm-)"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                    <div className="mb-6">
+                            <h4 className="font-medium mb-2">你的八字分析：</h4>
+                            {formData.birthTime && (
+                              <div className="space-y-4">
+                                {(() => {
+                                  const baZi = calculateBaZi(formData.birthTime);
+                                  const solar = Solar.fromDate(new Date(formData.birthTime));
+                                  const lunar = solar.getLunar();
+                                  return (
+                                    <>
+                                      <div className="text-[#666666] mb-4">
+                                        <p>公历：{new Date(formData.birthTime).toLocaleString('zh-CN', { 
+                                          year: 'numeric',
+                                          month: '2-digit',
+                                          day: '2-digit',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}</p>
+                                        <p>农历：{lunar.getYearInChinese()}年{lunar.getMonthInChinese()}月{lunar.getDayInChinese()}</p>
+                                      </div>
+                                      <div className="grid grid-cols-4 gap-4">
+                                        <div className="text-center">
+                                          <div className="font-medium mb-1">年柱</div>
+                                          <div className="bg-[#f8f5f0] p-2 rounded">
+                                            <div>{baZi.yearPillar.stem}</div>
+                                            <div>{baZi.yearPillar.branch}</div>
+                                          </div>
+                                        </div>
+                                        <div className="text-center">
+                                          <div className="font-medium mb-1">月柱</div>
+                                          <div className="bg-[#f8f5f0] p-2 rounded">
+                                            <div>{baZi.monthPillar.stem}</div>
+                                            <div>{baZi.monthPillar.branch}</div>
+                                          </div>
+                                        </div>
+                                        <div className="text-center">
+                                          <div className="font-medium mb-1">日柱</div>
+                                          <div className="bg-[#f8f5f0] p-2 rounded">
+                                            <div>{baZi.dayPillar.stem}</div>
+                                            <div>{baZi.dayPillar.branch}</div>
+                                          </div>
+                                        </div>
+                                        <div className="text-center">
+                                          <div className="font-medium mb-1">时柱</div>
+                                          <div className="bg-[#f8f5f0] p-2 rounded">
+                                            <div>{baZi.hourPillar.stem}</div>
+                                            <div>{baZi.hourPillar.branch}</div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <div>
+                                          <span className="font-medium">日主：</span>
+                                          {baZi.dayMaster}（{baZi.strength}）
+                                        </div>
+                                        <div>
+                                          <span className="font-medium">五行分布：</span>
+                                          {baZi.fiveElements.join("、")}
+                                        </div>
+                                        <div>
+                                          <span className="font-medium">喜用神：</span>
+                                          {baZi.favorable.join("、")}（{baZi.strength === "强" ? "喜克泄" : "喜生助"}）
+                                        </div>
+                                        <div>
+                                          <span className="font-medium">忌用神：</span>
+                                          {baZi.unfavorable.join("、")}（{baZi.strength === "强" ? "忌生助" : "忌克泄"}）
+                                        </div>
+                                      </div>
+                                    </>
+                                  )
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-medium text-lg mb-4">你的手链水晶组合</h3>
+                        <div className="space-y-6">
+                          {bracelet.properties.map((prop, i) => (
+                            <div key={i} className="bg-[#f8f5f0] p-4 rounded-lg">
+                              <div className="flex items-center mb-3">
+                                <div className="w-20 h-20 rounded-full overflow-hidden mr-4">
+                            <Image
+                                    src={bracelet.crystalImages[i] || "/crystal-placeholder.jpg"}
+                                    alt={prop.title}
+                                    width={80}
+                                    height={80}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <h4 className="font-medium text-lg">{prop.title}</h4>
+                              </div>
+                              <p className="text-[#666666]">{prop.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            )}
+
+            {currentStep === 4 && (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <h2 className="font-playfair text-2xl text-[#333333] mb-6">完成你的订单</h2>
+                <p className="text-[#666666] mb-8">请输入您的手围和订单号以完成订单。</p>
+
+                <div className="space-y-4">
+                    <div className="mb-6">
+                    <h4 className="font-medium mb-2">输入你的手围：</h4>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        value={wristSize}
+                        onChange={(e) => setWristSize(e.target.value)}
+                        className="w-24 border-[#cccccc] rounded-md"
+                        placeholder="手围"
+                        required
+                      />
+                      <span className="text-[#666666]">厘米</span>
+                    </div>
+                    </div>
+
+                  <div>
+                    <Label htmlFor="orderCode">订单编号</Label>
+                    <Input
+                      id="orderCode"
+                      name="orderCode"
+                      value={orderCode}
+                      onChange={(e) => setOrderCode(e.target.value)}
+                      className="border-[#cccccc]"
+                      required
+                    />
+                          </div>
+
+                  {orderStatus === "success" && (
+                    <div className="text-green-600 font-medium">谢谢您的订购！我们正在为您准备手链。</div>
+                  )}
+
+                  {orderStatus === "error" && <div className="text-red-600 font-medium">请输入有效的订单编号。</div>}
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#333333] hover:bg-[#555555] text-white"
+                    disabled={orderStatus === "success"}
+                  >
+                    {orderStatus === "success" ? "订单已提交" : "提交订单"}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            <div className="flex justify-between mt-8 pt-4 border-t border-[#eeeeee]">
+              {currentStep > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="border-[#333333] text-[#333333] hover:bg-[#f8f5f0]"
+                >
+                  上一步
+                </Button>
+              )}
+              {currentStep < steps.length && (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="ml-auto bg-[#333333] hover:bg-[#555555] text-white"
+                >
+                  下一步
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
+  )
+}

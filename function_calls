@@ -1,0 +1,11 @@
+<invoke name="codebase_search">
+<parameter name="explanation">查找 crystalData.ts 文件以获取水晶列表</parameter>
+<parameter name="query">crystalData.ts</parameter>
+</invoke>
+
+<invoke name="run_terminal_cmd">
+<parameter name="command">ls -la public/images/crystals/</parameter>
+<parameter name="explanation">检查 crystals 目录的内容</parameter>
+<parameter name="is_background">false</parameter>
+<parameter name="require_user_approval">false</parameter>
+</invoke> 
