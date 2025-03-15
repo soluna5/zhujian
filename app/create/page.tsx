@@ -274,30 +274,34 @@ export default function CreatePage() {
       // 优化图片生成配置
       const canvas = await html2canvas(braceletPreview, {
         backgroundColor: null,
-        scale: 1.0,  // 降到最低但仍保持基本清晰度
+        scale: 0.75,  // 降低分辨率以提高性能
         useCORS: true,
         allowTaint: true,
         logging: false,
         removeContainer: true,
-        imageTimeout: 0,
-        width: braceletPreview.offsetWidth,
-        height: braceletPreview.offsetHeight,
+        imageTimeout: 15000, // 增加超时时间
+        width: Math.min(braceletPreview.offsetWidth, 800), // 限制最大宽度
+        height: Math.min(braceletPreview.offsetHeight, 800), // 限制最大高度
         foreignObjectRendering: false,
         ignoreElements: (element) => {
           return element.classList.contains('ignore-capture');
         },
         onclone: (document, element) => {
-          // 在克隆时降低图片分辨率
+          // 在克隆时优化图片
           const images = element.getElementsByTagName('img');
           for (let img of images) {
-            img.style.maxWidth = '300px';  // 限制图片最大宽度
-            img.style.maxHeight = '300px';  // 限制图片最大高度
+            img.style.maxWidth = '200px';  // 进一步限制图片大小
+            img.style.maxHeight = '200px';
+            if (img.src.includes('data:image')) {
+              // 对于 base64 图片进行压缩
+              img.style.imageRendering = 'optimizeSpeed';
+            }
           }
         }
       })
 
-      // 获取图片数据URL，使用最低的可接受质量
-      const braceletImageUrl = canvas.toDataURL('image/jpeg', 0.3)  // 质量降到 0.3
+      // 获取图片数据URL，使用更低的质量
+      const braceletImageUrl = canvas.toDataURL('image/webp', 0.2)  // 使用 webp 格式并降低质量
       
       if (!braceletImageUrl || braceletImageUrl === 'data:,') {
         throw new Error('Failed to generate image URL')

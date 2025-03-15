@@ -135,6 +135,9 @@ const ComplexMagicAnimation: React.FC<ComplexMagicAnimationProps> = ({ selectedC
                         width={64}
                         height={64}
                         className="w-full h-full rounded-full object-cover"
+                        loading="eager"
+                        priority={index === 0}
+                        quality={75}
                       />
                       <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-full" />
                     </div>
