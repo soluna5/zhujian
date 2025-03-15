@@ -93,7 +93,7 @@ export const crystalData: Crystal[] = [
   {
     id: "zishuijing",
     name: "紫水晶",
-    description: "强大的保护石，能净化能量场，增强直觉和灵性意识。有助于冥想和内在成长，改善睡眠质量。",
+    description: "紫水晶是一种强大的保护石，能净化周围的负面能量场，显著增强直觉和灵性意识。紫水晶有助于深层冥想和内在成长，能改善睡眠质量，让心灵获得平静。",
     images: {
       spacer: "/images/crystals/amethyst/spacer.png",
       round: "/images/crystals/amethyst/round.png",
@@ -148,7 +148,7 @@ export const crystalData: Crystal[] = [
   {
     id: "fenjing",
     name: "粉晶",
-    description: "爱与和谐的象征，促进人际关系，增强自我接纳。温和的能量可以打开心轮，帮助释放情感创伤。",
+    description: "粉晶象征着爱与和谐的力量，能有效促进人际关系的和睦，增强自我接纳和理解。粉晶温和的能量可以打开心轮，帮助释放情感创伤，让人感受到温暖与关爱。",
     images: {
       spacer: "/images/crystals/fenjing/spacer.png",
       round: "/images/crystals/fenjing/round.png",
@@ -203,7 +203,7 @@ export const crystalData: Crystal[] = [
   {
     id: "clear_quartz",
     name: "白水晶",
-    description: "水晶之王，最全能的能量放大器。具有极强的净化和编程能力，帮助厘清思绪，增强意志力。",
+    description: "白水晶被誉为水晶之王，是最全能的能量放大器和转化器。白水晶具有极强的净化和编程能力，能帮助使用者厘清思绪，增强意志力，是修行和冥想的绝佳伴侣。",
     images: {
       spacer: "/images/crystals/clear_quartz/spacer.png",
       round: "/images/crystals/clear_quartz/round.png",
@@ -249,7 +249,7 @@ export const crystalData: Crystal[] = [
   {
     id: "citrine",
     name: "黄水晶",
-    description: "强大的财富石，带来富足和丰盛能量。激发创造力和积极性，注入活力，驱散负面情绪。",
+    description: "黄水晶是强大的财富之石，能带来丰盛和富足的能量。黄水晶可以激发创造力和积极性，注入充沛的活力，驱散负面情绪，是事业和财运的有力助手。",
     images: {
       spacer: "/images/crystals/citrine/spacer.png",
       round: "/images/crystals/citrine/round.png",
@@ -304,7 +304,7 @@ export const crystalData: Crystal[] = [
   {
     id: "black_obsidian",
     name: "黑曜石",
-    description: "强大的保护石，隔绝负面能量，提供精神屏障。如能量之镜，帮助直面内在阴影，促进自我认知。",
+    description: "黑曜石是一种强大的保护石，能有效隔绝外界的负面能量，为使用者提供坚实的精神屏障。黑曜石如同能量之镜，帮助使用者直面内在阴影，促进自我认知和成长。",
     images: {
       spacer: "/images/crystals/black_obsidian/spacer.png",
       round: "/images/crystals/black_obsidian/round.png",
@@ -359,7 +359,7 @@ export const crystalData: Crystal[] = [
   {
     id: "yuelongshi",
     name: "月光石",
-    description: "增强直觉，平衡情绪，是女性能量的象征。柔和的光芒安抚不安的心绪，增强敏感度。",
+    description: "月光石能显著增强直觉力，平衡情绪波动，是女性能量的完美象征。月光石柔和的光芒能安抚不安的心绪，增强敏感度，促进与高我的连接。",
     images: {
       spacer: "/images/crystals/moonstone/spacer.png",
       round: "/images/crystals/moonstone/round.png",
@@ -414,7 +414,7 @@ export const crystalData: Crystal[] = [
   {
     id: "lapis_lazuli",
     name: "青金石",
-    description: "智慧与真实表达的象征，增强沟通能力和领导魅力。开启第三眼轮和喉轮，增强精神洞察力。",
+    description: "青金石象征着智慧与真实的表达能力，能增强沟通能力和领导魅力。青金石可以开启第三眼轮和喉轮，增强精神洞察力，促进真理的探索。",
     images: {
       spacer: "/images/crystals/qingjinshi/spacer.png",
       round: "/images/crystals/qingjinshi/round.png",
@@ -470,7 +470,7 @@ export const crystalData: Crystal[] = [
   {
     id: "red_agate",
     name: "红玛瑙",
-    description: "充满活力的保护石，增强勇气和自信。激发内在动力，改善血液循环，增强体质。",
+    description: "红玛瑙是充满活力的保护石，能增强使用者的勇气和自信心。红玛瑙可以激发内在动力，改善血液循环，增强体质，是提升个人能量的理想选择。",
     images: {
       spacer: "/images/crystals/red_agate/spacer.png",
       round: "/images/crystals/red_agate/round.png",
@@ -526,7 +526,7 @@ export const crystalData: Crystal[] = [
   {
     id: "smoky_quartz",
     name: "茶晶",
-    description: "强大的净化石，吸收负面能量，消除压力和焦虑。稳定情绪，帮助保持冷静和理性。",
+    description: "茶晶是强大的净化石，能有效吸收周围的负面能量，消除压力和焦虑情绪。茶晶可以稳定情绪波动，帮助使用者保持冷静和理性，是现代人的必备能量工具。",
     images: {
       spacer: "/images/crystals/smoky_quartz/spacer.png",
       round: "/images/crystals/smoky_quartz/round.png",
@@ -582,7 +582,7 @@ export const crystalData: Crystal[] = [
   {
     id: "green_phantom",
     name: "绿幽灵",
-    description: "蕴含神秘生命能量，促进个人成长和转变。增强直觉和创造力，带来繁荣和丰盛。",
+    description: "绿幽灵蕴含着神秘的生命能量，能促进个人的全方位成长和转变。绿幽灵可以增强直觉和创造力，带来繁荣和丰盛，是实现愿望的催化剂。",
     images: {
       spacer: "/images/crystals/green_phantom/spacer.png",
       round: "/images/crystals/green_phantom/round.png",
@@ -637,7 +637,7 @@ export const crystalData: Crystal[] = [
   {
     id: "aquamarine",
     name: "海蓝宝",
-    description: "净化心灵，增强勇气和沟通能力。安抚焦躁情绪，增强表达能力和创造力。",
+    description: "海蓝宝能净化心灵，增强勇气和沟通能力。海蓝宝石温和的能量可以安抚焦躁的情绪，增强表达能力和创造力，让人如沐春风。",
     images: {
       spacer: "/images/crystals/aquamarine/spacer.png",
       round: "/images/crystals/aquamarine/round.png",
@@ -692,7 +692,7 @@ export const crystalData: Crystal[] = [
   {
     id: "garnet",
     name: "石榴石",
-    description: "充满生命力的能量石，激发热情和创造力。增强意志力和行动力，是事业和健康的守护石。",
+    description: "石榴石充满强大的生命力能量，能激发使用者的热情和创造力。石榴石可以增强意志力和行动力，是事业和健康的守护石，能带来源源不断的动力。",
     images: {
       spacer: "/images/crystals/garnet/spacer.png",
       round: "/images/crystals/garnet/round.png",
@@ -747,7 +747,7 @@ export const crystalData: Crystal[] = [
   {
     id: "red_rutilated_quartz",
     name: "红纹石",
-    description: "强大的能量激活石，增强个人力量和决断力。加速愿望实现，增强行动力。",
+    description: "红纹石是强大的能量激活石，能增强使用者的个人力量和决断力。红纹石可以加速愿望的实现，增强行动力，帮助突破困境，实现目标。",
     images: {
       spacer: "/images/crystals/red_rutilated_quartz/spacer.png",
       round: "/images/crystals/red_rutilated_quartz/round.png",
@@ -804,7 +804,7 @@ export const crystalData: Crystal[] = [
   {
     id: "turquoise",
     name: "绿松石",
-    description: "古老的保护石，带来好运和平静。增强沟通和创造力，是旅行者的守护石。",
+    description: "绿松石是古老的保护石，能为使用者带来好运和内心的平静。绿松石可以增强沟通和创造力，是旅行者的守护石，能在人生旅途中提供指引。",
     images: {
       spacer: "/images/crystals/turquoise/spacer.png",
       round: "/images/crystals/turquoise/round.png",
@@ -859,7 +859,7 @@ export const crystalData: Crystal[] = [
   {
     id: "dongling_jade",
     name: "东陵玉",
-    description: "承载东方古老智慧，带来平衡和和谐。安抚心神，帮助找到内在的中庸之道。",
+    description: "东陵玉承载着东方古老的智慧精髓，能为使用者带来平衡和和谐。东陵玉可以安抚心神，帮助找到内在的中庸之道，是修身养性的上佳选择。",
     images: {
       spacer: "/images/crystals/dongling_jade/spacer.png",
       round: "/images/crystals/dongling_jade/round.png",
@@ -914,7 +914,7 @@ export const crystalData: Crystal[] = [
   {
     id: "peridot",
     name: "橄榄石",
-    description: "带来丰盛和繁荣，净化负面能量。增强活力和创造力，吸引财富和机遇。",
+    description: "橄榄石能带来丰盛和繁荣的能量，有效净化负面能量。橄榄石可以增强活力和创造力，吸引财富和机遇，是招财转运的有力助手。",
     images: {
       spacer: "/images/crystals/peridot/spacer.png",
       round: "/images/crystals/peridot/round.png",
@@ -970,7 +970,7 @@ export const crystalData: Crystal[] = [
   {
     id: "kyanite",
     name: "蓝晶石",
-    description: "沟通的桥梁，促进表达和灵性成长。增强冥想效果，帮助表达内心真实想法。",
+    description: "蓝晶石是沟通的桥梁，能促进表达能力和灵性成长。蓝晶石可以增强冥想效果，帮助表达内心真实想法，促进与高维能量的连接。",
     images: {
       spacer: "/images/crystals/kyanite/spacer.png",
       round: "/images/crystals/kyanite/round.png",
@@ -1025,7 +1025,7 @@ export const crystalData: Crystal[] = [
   {
     id: "prehnite",
     name: "葡萄石",
-    description: "充满治愈能量，增强直觉和预知能力。安抚心灵，帮助连接更高的指引。",
+    description: "葡萄石充满温和的治愈能量，能增强使用者的直觉和预知能力。葡萄石可以安抚心灵，帮助连接更高的指引，是灵性成长的重要伴侣。",
     images: {
       spacer: "/images/crystals/prehnite/spacer.png",
       round: "/images/crystals/prehnite/round.png",
@@ -1082,7 +1082,7 @@ export const crystalData: Crystal[] = [
   {
     id: "green_strawberry_quartz",
     name: "绿草莓晶",
-    description: "增强心灵成长和爱的能量，促进平衡和和谐。带来治愈和保护的力量。",
+    description: "绿草莓晶能增强心灵成长和爱的能量，促进整体的平衡和和谐。绿草莓晶带来温和的治愈和保护力量，帮助打开心轮，接纳生命的美好。",
     images: {
       spacer: "/images/crystals/green_strawberry_quartz/spacer.png",
       round: "/images/crystals/green_strawberry_quartz/round.png",
@@ -1137,7 +1137,7 @@ export const crystalData: Crystal[] = [
   {
     id: "blue_lace_agate",
     name: "蓝纹玛瑙",
-    description: "促进沟通和表达，带来平静和宁静。增强冷静和清晰的思维能力。",
+    description: "蓝纹玛瑙能促进有效的沟通和表达，为使用者带来深层的平静与宁静。蓝纹玛瑙可以增强冷静和清晰的思维能力，帮助在交流中保持优雅。",
     images: {
       spacer: "/images/crystals/blue_lace_agate/spacer.png",
       round: "/images/crystals/blue_lace_agate/round.png",
@@ -1192,7 +1192,7 @@ export const crystalData: Crystal[] = [
   {
     id: "rhodonite",
     name: "蔷薇辉石",
-    description: "促进爱与平衡，增强情感治愈和自我价值。带来平静和勇气的能量。",
+    description: "蔷薇辉石能促进爱与平衡的能量，增强情感的治愈和自我价值的认知。蔷薇辉石可以带来平静和勇气的能量，帮助释放情感创伤。",
     images: {
       spacer: "/images/crystals/rhodonite/spacer.png",
       round: "/images/crystals/rhodonite/round.png",
@@ -1248,7 +1248,7 @@ export const crystalData: Crystal[] = [
   {
     id: "celestite",
     name: "天青石",
-    description: "增强精神意识和高维沟通，带来深层的平静与智慧。改善睡眠，净化心灵。",
+    description: "天青石能增强精神意识和高维沟通的能力，为使用者带来深层的平静与智慧。天青石可以改善睡眠质量，净化心灵，是冥想和灵修的理想伴侣。",
     images: {
       spacer: "/images/crystals/celestite/spacer.png",
       round: "/images/crystals/celestite/round.png",
@@ -1305,7 +1305,7 @@ export const crystalData: Crystal[] = [
   {
     id: "golden_rutilated_quartz",
     name: "金发晶",
-    description: "强大的能量激活石，促进财富和事业发展。增强个人魅力，带来好运和机遇。",
+    description: "金发晶是强大的能量激活石，能促进财富和事业的蓬勃发展。金发晶可以增强个人魅力，带来好运和机遇，是事业腾飞的助推器。",
     images: {
       spacer: "/images/crystals/golden_rutilated_quartz/spacer.png",
       round: "/images/crystals/golden_rutilated_quartz/round.png",
@@ -1362,7 +1362,7 @@ export const crystalData: Crystal[] = [
   {
     id: "strawberry_quartz",
     name: "草莓晶",
-    description: "充满温暖的爱的能量，促进情感治愈。打开心轮，帮助接纳和疗愈内在创伤。",
+    description: "草莓晶充满温暖的爱的能量，能促进深层的情感治愈。草莓晶可以打开心轮，帮助接纳和疗愈内在创伤，让心灵重获温暖与力量。",
     images: {
       spacer: "/images/crystals/strawberry_quartz/spacer.png",
       round: "/images/crystals/strawberry_quartz/round.png",
@@ -1417,7 +1417,7 @@ export const crystalData: Crystal[] = [
   {
     id: "blue_apatite",
     name: "蓝磷灰",
-    description: "创意与表达的催化剂，增强沟通能力。开启智慧之门，促进学习和记忆。",
+    description: "蓝磷灰是创意与表达的有力催化剂，能显著增强沟通能力。蓝磷灰可以开启智慧之门，促进学习和记忆力的提升，是求知者的理想搭档。",
     images: {
       spacer: "/images/crystals/blue_apatite/spacer.png",
       round: "/images/crystals/blue_apatite/round.png",
@@ -1473,7 +1473,7 @@ export const crystalData: Crystal[] = [
   {
     id: "yellow_calcite",
     name: "黄方解石",
-    description: "散发温暖阳光能量，增强自信和学习能力。激活太阳轮，带来积极乐观的心态。",
+    description: "黄方解石散发着温暖的阳光能量，能增强自信和学习能力。黄方解石可以激活太阳轮，带来积极乐观的心态，提升个人能量场。",
     images: {
       spacer: "/images/crystals/yellow_calcite/spacer.png",
       round: "/images/crystals/yellow_calcite/round.png",
@@ -1529,7 +1529,7 @@ export const crystalData: Crystal[] = [
   {
     id: "amazonite",
     name: "天河石",
-    description: "促进沟通和表达，增强勇气和自信心。平衡情绪，带来和谐的人际关系。",
+    description: "天河石能促进有效的沟通和自我表达，增强使用者的勇气和自信心。天河石可以平衡情绪波动，带来和谐的人际关系，是社交场合的得力助手。",
     images: {
       spacer: "/images/crystals/amazonite/spacer.png",
       round: "/images/crystals/amazonite/round.png",
@@ -1576,7 +1576,7 @@ export const crystalData: Crystal[] = [
   {
     id: "green_fluorite",
     name: "绿荧石",
-    description: "心灵平衡的守护石，促进情感治愈。净化心轮，带来内在的平静与和谐。",
+    description: "绿荧石是心灵平衡的守护石，能促进深层的情感治愈。绿荧石可以净化心轮，带来内在的平静与和谐，帮助找回内心的平衡。",
     images: {
       spacer: "/images/crystals/green_fluorite/spacer.png",
       round: "/images/crystals/green_fluorite/round.png",
@@ -1623,7 +1623,7 @@ export const crystalData: Crystal[] = [
   {
     id: "green_strawberry_quartz",
     name: "绿草莓晶",
-    description: "融合爱与生机的能量，促进心灵成长。滋养心轮，增强与自然的连接。",
+    description: "绿草莓晶融合着爱与生机的能量，能促进全方位的心灵成长。绿草莓晶可以滋养心轮，增强与自然的连接，带来生命的活力与喜悦。",
     images: {
       spacer: "/images/crystals/green_strawberry_quartz/spacer.png",
       round: "/images/crystals/green_strawberry_quartz/round.png",
