@@ -13,21 +13,10 @@ interface OrderConfirmation {
 }
 
 export async function saveOrderConfirmation(data: OrderConfirmation) {
-  console.log('Attempting to save order confirmation:', data)
-  
   try {
     // 验证数据
     if (!data.identity_key || !data.order_number || !data.wrist_size || !data.bracelet_size ||
         !data.destiny_crystal || !data.functional_crystal || !data.corrective_crystal) {
-      console.error('Missing required fields:', {
-        hasIdentityKey: !!data.identity_key,
-        hasOrderNumber: !!data.order_number,
-        hasWristSize: !!data.wrist_size,
-        hasBraceletSize: !!data.bracelet_size,
-        hasDestinyCrystal: !!data.destiny_crystal,
-        hasFunctionalCrystal: !!data.functional_crystal,
-        hasCorrectiveCrystal: !!data.corrective_crystal
-      })
       return { 
         success: false, 
         error: '请填写所有必需信息' 
@@ -52,7 +41,6 @@ export async function saveOrderConfirmation(data: OrderConfirmation) {
       .single()
 
     if (error) {
-      console.error('Supabase error:', error)
       // 处理特定错误类型
       if (error.code === '23505') {
         // 唯一约束冲突
@@ -71,10 +59,8 @@ export async function saveOrderConfirmation(data: OrderConfirmation) {
       }
     }
 
-    console.log('Order confirmation saved successfully:', result)
     return { success: true, data: result }
   } catch (error) {
-    console.error('Error in saveOrderConfirmation:', error)
     return { 
       success: false, 
       error: '订单系统暂时无法使用，请稍后重试'

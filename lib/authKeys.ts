@@ -251,14 +251,11 @@ async function isKeyUsed(key: string): Promise<boolean> {
       .maybeSingle()
 
     if (error) {
-      console.error('Error checking key usage:', error)
       return false
     }
 
-    console.log('Database check result:', { data, key })
     return !!data
   } catch (error) {
-    console.error('Error in isKeyUsed:', error)
     return false
   }
 }

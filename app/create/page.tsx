@@ -260,7 +260,6 @@ export default function CreatePage() {
       // 获取已渲染的手链预览元素
       const braceletPreview = document.querySelector('.bracelet-preview') as HTMLDivElement
       if (!braceletPreview) {
-        console.error('Cannot find bracelet preview element')
         toast({
           title: "图片生成失败",
           description: "无法找到手链预览元素。",
@@ -269,27 +268,40 @@ export default function CreatePage() {
         return
       }
 
-      // 等待一段时间确保3D渲染完成
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // 减少等待时间，因为3D渲染通常在500ms内就能完成
+      await new Promise(resolve => setTimeout(resolve, 500))
 
-      // 使用html2canvas捕获图片，设置更高的scale以获得更好的质量
+      // 优化图片生成配置
       const canvas = await html2canvas(braceletPreview, {
         backgroundColor: null,
-        scale: 2,
-        logging: true, // 启用日志以便调试
-        useCORS: true, // 允许跨域图片
-        allowTaint: true, // 允许跨域图片
+        scale: 1.0,  // 降到最低但仍保持基本清晰度
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        removeContainer: true,
+        imageTimeout: 0,
+        width: braceletPreview.offsetWidth,
+        height: braceletPreview.offsetHeight,
+        foreignObjectRendering: false,
+        ignoreElements: (element) => {
+          return element.classList.contains('ignore-capture');
+        },
+        onclone: (document, element) => {
+          // 在克隆时降低图片分辨率
+          const images = element.getElementsByTagName('img');
+          for (let img of images) {
+            img.style.maxWidth = '300px';  // 限制图片最大宽度
+            img.style.maxHeight = '300px';  // 限制图片最大高度
+          }
+        }
       })
 
-      // 获取图片数据URL
-      const braceletImageUrl = canvas.toDataURL('image/png')
+      // 获取图片数据URL，使用最低的可接受质量
+      const braceletImageUrl = canvas.toDataURL('image/jpeg', 0.3)  // 质量降到 0.3
       
-      // 检查图片URL是否有效
       if (!braceletImageUrl || braceletImageUrl === 'data:,') {
         throw new Error('Failed to generate image URL')
       }
-
-      console.log('Generated image URL:', braceletImageUrl.substring(0, 100) + '...') // 打印图片URL的前100个字符用于调试
 
       // 准备订单数据
       const orderData = {
@@ -301,39 +313,34 @@ export default function CreatePage() {
         functional_crystal: bracelet.crystals[1]?.name || '',
         corrective_crystal: bracelet.crystals[2]?.name || '',
         bracelet_layout: JSON.stringify(braceletLayouts[braceletSize] || []),
-        bracelet_design_url: braceletImageUrl // 确保这里设置了图片URL
+        bracelet_design_url: braceletImageUrl
       }
 
-      console.log('Submitting order with data:', {
-        ...orderData,
-        bracelet_design_url: orderData.bracelet_design_url.substring(0, 100) + '...' // 只打印URL的开头部分
-      })
-
-      // 保存订单确认信息
-      const result = await saveOrderConfirmation(orderData)
-      console.log('Save order confirmation result:', result)
+      // 并行处理订单保存和标记密钥使用
+      const [result] = await Promise.all([
+        saveOrderConfirmation(orderData),
+        markKeyAsUsed(verifiedAuthKey)
+      ])
 
       if (result && result.success) {
-        try {
-          await markKeyAsUsed(verifiedAuthKey)
-          toast({
-            title: "订单提交成功",
-            description: "感谢您的订购！",
-            variant: "default",
-          })
-          router.push("/thank-you")
-          setTimeout(() => {
+        toast({
+          title: "订单提交成功",
+          description: "感谢您的订购！",
+          variant: "default",
+        })
+        
+        // 使用 Promise.all 并行处理跳转和清除密钥
+        Promise.all([
+          router.push("/thank-you"),
+          new Promise(resolve => {
             localStorage.removeItem("verifiedAuthKey")
-          }, 1000)
-        } catch (markKeyError) {
-          console.error('Error marking key as used:', markKeyError)
-          router.push("/thank-you")
-        }
+            resolve(null)
+          })
+        ])
       } else {
         throw new Error(result?.error ? String(result.error) : '订单确认失败，请稍后重试')
       }
-    } catch (error: any) {
-      console.error('Error in order submission:', error)
+    } catch (error) {
       toast({
         title: "提交失败",
         description: error?.message || "订单提交过程中出现错误，请稍后重试。如果问题持续存在，请联系客服。",
@@ -347,17 +354,7 @@ export default function CreatePage() {
   };
 
   const generateBracelet = (formData: FormData): Bracelet => {
-    console.log("=== BRACELET GENERATION START ===");
-    console.log("Generating bracelet with size:", braceletSize);
-    console.log("User need:", formData.primaryNeed || "None");
-    console.log("Corrective need:", formData.correctiveSituation || "None");
-    console.log("Impression:", formData.impression || "None");
-    console.log("Potential:", formData.potential || "None");
-    console.log("Health issue:", formData.healthIssue || "None");
-    
-    // 获取八字分析结果
     const baZiResult = calculateBaZi(formData.birthTime);
-    console.log("BaZi result:", baZiResult);
     
     // 将用户需求映射到 PrimaryNeed 枚举
     const primaryNeedMap: Record<string, PrimaryNeed> = {
@@ -404,13 +401,6 @@ export default function CreatePage() {
       'hormonal': HealthIssue.HORMONAL
     };
     
-    console.log("=== MAPPED VALUES ===");
-    console.log("Primary need:", primaryNeedMap[formData.primaryNeed]);
-    console.log("Common situation:", commonSituationMap[formData.correctiveSituation]);
-    console.log("Impression:", impressionMap[formData.impression]);
-    console.log("Potential:", potentialMap[formData.potential]);
-    console.log("Health issue:", healthIssueMap[formData.healthIssue]);
-    
     // 使用 selectCrystals 函数选择水晶
     const selectedCrystals = selectCrystals(
       baZiResult.dayMaster,
@@ -424,11 +414,6 @@ export default function CreatePage() {
       formData.birthTime, // 添加出生日期时间参数
       [] // 没有排除的水晶
     );
-    
-    console.log("=== FINAL SELECTION ===");
-    console.log("Destiny stone:", selectedCrystals.destinyCrystal?.name);
-    console.log("Functional stone:", selectedCrystals.functionalCrystal?.name);
-    console.log("Corrective stone:", selectedCrystals.correctiveCrystal?.name);
     
     // 返回手链数据
     return {
@@ -554,12 +539,6 @@ export default function CreatePage() {
     
     // 按分数降序排序
     scoredCandidates.sort((a, b) => b.score - a.score);
-    
-    // 打印前几个得分最高的石头，用于调试
-    console.log("Top scored candidates:");
-    scoredCandidates.slice(0, 3).forEach(item => {
-      console.log(`${item.crystal.name}: ${item.score}`);
-    });
     
     // 返回得分最高的石头
     return scoredCandidates[0].crystal;
