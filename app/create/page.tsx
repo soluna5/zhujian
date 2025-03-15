@@ -102,7 +102,8 @@ export default function CreatePage() {
   })
 
   const [bracelet, setBracelet] = useState<Bracelet | null>(null)
-  const [orderStatus, setOrderStatus] = useState<"idle" | "success" | "error">("idle")
+  type OrderStatus = "idle" | "loading" | "success" | "error"
+  const [orderStatus, setOrderStatus] = useState<OrderStatus>("idle")
   const [showAnimation, setShowAnimation] = useState(false)
   const [braceletSize, setBraceletSize] = useState<BraceletSize>("medium")
   const [wristSize, setWristSize] = useState("")
@@ -112,6 +113,8 @@ export default function CreatePage() {
     medium: undefined,
     small: undefined
   })
+  const [braceletImageUrl, setBraceletImageUrl] = useState<string>("")
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
 
   useEffect(() => {
     // Check for verified auth key
@@ -230,9 +233,75 @@ export default function CreatePage() {
     setCurrentStep(currentStep - 1)
   }
 
+  // 预生成图片的函数
+  const generateBraceletImage = async () => {
+    if (isGeneratingImage) return
+    setIsGeneratingImage(true)
+
+    try {
+      const braceletPreview = document.querySelector('.bracelet-preview') as HTMLDivElement
+      if (!braceletPreview) {
+        throw new Error('无法找到手链预览元素')
+      }
+
+      const canvas = await html2canvas(braceletPreview, {
+        backgroundColor: null,
+        scale: 0.75,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        removeContainer: true,
+        imageTimeout: 15000,
+        width: Math.min(braceletPreview.offsetWidth, 800),
+        height: Math.min(braceletPreview.offsetHeight, 800),
+        foreignObjectRendering: false,
+        ignoreElements: (element) => {
+          return element.classList.contains('ignore-capture')
+        },
+        onclone: (document, element) => {
+          const images = element.getElementsByTagName('img')
+          for (let img of images) {
+            img.style.maxWidth = '200px'
+            img.style.maxHeight = '200px'
+            if (img.src.includes('data:image')) {
+              img.style.imageRendering = 'optimizeSpeed'
+            }
+          }
+        }
+      })
+
+      const imageUrl = canvas.toDataURL('image/webp', 0.2)
+      if (!imageUrl || imageUrl === 'data:,') {
+        throw new Error('生成图片URL失败')
+      }
+
+      setBraceletImageUrl(imageUrl)
+      return imageUrl
+    } catch (error) {
+      console.error('生成图片失败:', error)
+      throw error
+    } finally {
+      setIsGeneratingImage(false)
+    }
+  }
+
+  // 在进入第4步时预生成图片
+  useEffect(() => {
+    if (currentStep === 4 && !braceletImageUrl) {
+      generateBraceletImage().catch(console.error)
+    }
+  }, [currentStep, braceletImageUrl])
+
+  // 预加载感谢页面
+  useEffect(() => {
+    if (currentStep === 4) {
+      router.prefetch('/thank-you')
+    }
+  }, [currentStep, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setOrderStatus("idle")
+    setOrderStatus("loading")
 
     try {
       // 验证手围和订单编号
@@ -242,6 +311,7 @@ export default function CreatePage() {
           description: "请确保您已填写手围和订单编号。",
           variant: "destructive",
         })
+        setOrderStatus("idle")
         return
       }
 
@@ -253,58 +323,15 @@ export default function CreatePage() {
           description: "请重新验证身份ID。",
           variant: "destructive",
         })
+        setOrderStatus("idle")
         router.push("/verify-order")
         return
       }
 
-      // 获取已渲染的手链预览元素
-      const braceletPreview = document.querySelector('.bracelet-preview') as HTMLDivElement
-      if (!braceletPreview) {
-        toast({
-          title: "图片生成失败",
-          description: "无法找到手链预览元素。",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // 减少等待时间，因为3D渲染通常在500ms内就能完成
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // 优化图片生成配置
-      const canvas = await html2canvas(braceletPreview, {
-        backgroundColor: null,
-        scale: 0.75,  // 降低分辨率以提高性能
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        removeContainer: true,
-        imageTimeout: 15000, // 增加超时时间
-        width: Math.min(braceletPreview.offsetWidth, 800), // 限制最大宽度
-        height: Math.min(braceletPreview.offsetHeight, 800), // 限制最大高度
-        foreignObjectRendering: false,
-        ignoreElements: (element) => {
-          return element.classList.contains('ignore-capture');
-        },
-        onclone: (document, element) => {
-          // 在克隆时优化图片
-          const images = element.getElementsByTagName('img');
-          for (let img of images) {
-            img.style.maxWidth = '200px';  // 进一步限制图片大小
-            img.style.maxHeight = '200px';
-            if (img.src.includes('data:image')) {
-              // 对于 base64 图片进行压缩
-              img.style.imageRendering = 'optimizeSpeed';
-            }
-          }
-        }
-      })
-
-      // 获取图片数据URL，使用更低的质量
-      const braceletImageUrl = canvas.toDataURL('image/webp', 0.2)  // 使用 webp 格式并降低质量
-      
-      if (!braceletImageUrl || braceletImageUrl === 'data:,') {
-        throw new Error('Failed to generate image URL')
+      // 使用已生成的图片或重新生成
+      const imageUrl = braceletImageUrl || await generateBraceletImage()
+      if (!imageUrl) {
+        throw new Error('生成图片失败')
       }
 
       // 准备订单数据
@@ -317,34 +344,28 @@ export default function CreatePage() {
         functional_crystal: bracelet.crystals[1]?.name || '',
         corrective_crystal: bracelet.crystals[2]?.name || '',
         bracelet_layout: JSON.stringify(braceletLayouts[braceletSize] || []),
-        bracelet_design_url: braceletImageUrl
+        bracelet_design_url: imageUrl
       }
 
-      // 并行处理订单保存和标记密钥使用
-      const [result] = await Promise.all([
-        saveOrderConfirmation(orderData),
-        markKeyAsUsed(verifiedAuthKey)
-      ])
+      // 保存订单
+      const result = await saveOrderConfirmation(orderData)
 
       if (result && result.success) {
+        setOrderStatus("success")
         toast({
           title: "订单提交成功",
           description: "感谢您的订购！",
           variant: "default",
         })
         
-        // 使用 Promise.all 并行处理跳转和清除密钥
-        Promise.all([
-          router.push("/thank-you"),
-          new Promise(resolve => {
-            localStorage.removeItem("verifiedAuthKey")
-            resolve(null)
-          })
-        ])
+        // 清除密钥并跳转
+        localStorage.removeItem("verifiedAuthKey")
+        router.push("/thank-you")
       } else {
         throw new Error(result?.error ? String(result.error) : '订单确认失败，请稍后重试')
       }
-    } catch (error) {
+    } catch (error: any) {
+      setOrderStatus("error")
       toast({
         title: "提交失败",
         description: error?.message || "订单提交过程中出现错误，请稍后重试。如果问题持续存在，请联系客服。",
@@ -1064,9 +1085,18 @@ export default function CreatePage() {
                   <Button
                     type="submit"
                     className="w-full bg-[#333333] hover:bg-[#555555] text-white"
-                    disabled={orderStatus === "success"}
+                    disabled={orderStatus === "loading" || orderStatus === "success"}
                   >
-                    {orderStatus === "success" ? "订单已提交" : "提交订单"}
+                    {orderStatus === "loading" ? (
+                      <div className="flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        正在提交...
+                      </div>
+                    ) : orderStatus === "success" ? (
+                      "订单已提交"
+                    ) : (
+                      "提交订单"
+                    )}
                   </Button>
                 </div>
               </form>
