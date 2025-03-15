@@ -11,7 +11,10 @@ const testData = {
   order_number: 'test_order_' + Date.now(),
   wrist_size: 16.5,
   bracelet_design_url: 'test_url',
-  bracelet_size: 'medium'
+  bracelet_size: 'medium',
+  destiny_crystal: '紫水晶',
+  functional_crystal: '粉晶',
+  corrective_crystal: '黑曜石'
 }
 
 // 测试插入和查询
