@@ -332,21 +332,38 @@ export function calculateBaZi(birthTime: string): BaZiResult {
     "12": [7, 22]   // 大雪、冬至
   };
 
-  const month = solar.getMonth(); // 0-based
+  // 获取月份并确保在1-12范围内
+  const rawMonth = solar.getMonth(); // 0-based
+  const month = ((rawMonth % 12) + 12) % 12; // 确保月份在0-11范围内
   const day = solar.getDay();
   
+  console.log('Raw month:', rawMonth);
+  console.log('Normalized month:', month);
+  
   // 确定节气月
-  // 如果当前日期小于本月第一个节气，则使用上个月
-  const monthStartDay = SOLAR_TERMS_DAYS[String(month + 1)][0];
+  const monthKey = String(month + 1);
+  if (!SOLAR_TERMS_DAYS[monthKey]) {
+    console.error('Invalid month:', month + 1);
+    throw new Error(`Invalid month: ${month + 1}`);
+  }
+  const monthStartDay = SOLAR_TERMS_DAYS[monthKey][0];
   
   // 计算节气月份（从寅月开始，寅月为0）
   let solarTermMonth;
-  if (day < monthStartDay) {
-    // 如果在节气前，用上个月
-    solarTermMonth = ((month - 1 + 12) % 12 - 2 + 12) % 12;
+  if (month === 11) {
+    // 12月特殊处理
+    if (day < monthStartDay) {
+      solarTermMonth = 9; // 11月对应的节气月（从寅月开始数）
+    } else {
+      solarTermMonth = 10; // 12月对应的节气月（从寅月开始数）
+    }
   } else {
-    // 如果在节气后，用当前月
-    solarTermMonth = ((month + 12) % 12 - 2 + 12) % 12;
+    // 其他月份
+    if (day < monthStartDay) {
+      solarTermMonth = ((month - 1 + 12) % 12 - 2 + 12) % 12;
+    } else {
+      solarTermMonth = ((month + 12) % 12 - 2 + 12) % 12;
+    }
   }
   
   // 计算月支
