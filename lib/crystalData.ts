@@ -1430,14 +1430,14 @@ export const crystalData: Crystal[] = [
     functionalAttributes: {
       primaryPurposes: {
         career: true,
-        balance: true,
+        balance: false,
         relationship: false,
         wealth: false,
         protection: false
       },
       impressions: {
         insightful: true,  // D洞若观火的冷静洞察力
-        charming: true,   // C锋芒毕露的个人魅力值
+        charming: false,   // C锋芒毕露的个人魅力值
         warm: false,       // A如沐春风般的温暖亲和力
         reliable: false    // B沉稳可靠的专业权威感
       },
@@ -1445,13 +1445,13 @@ export const crystalData: Crystal[] = [
     correctiveAttributes: {
       correctiveProperties: {
         indecisive: true,
-        energySensitive: true,
+        energySensitive: false,
         fatigue: false,
         socialDrain: false
       },
       potentials: {
         expression: true,  // C卓越表达力
-        intuition: true,  // D直觉敏锐度
+        intuition: false,  // D直觉敏锐度
         empathy: false,    // A细腻共情力
         decision: false,   // B理性决策力
         efficiency: false  // E高效行动力
@@ -1461,8 +1461,8 @@ export const crystalData: Crystal[] = [
         sleep: false,
         immunity: false,
         circulation: false,
-        respiratory: true,
-        mood: true,
+        respiratory: false,
+        mood: false,
         hormonal: false
       }
     },
