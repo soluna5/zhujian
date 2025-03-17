@@ -5,7 +5,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// 测试连接和表结构
+// 测试数据定义（保留但不自动运行）
 const testData = {
   identity_key: 'test_key_' + Date.now(),
   order_number: 'test_order_' + Date.now(),
@@ -17,7 +17,7 @@ const testData = {
   corrective_crystal: '黑曜石'
 }
 
-// 测试插入和查询
+// 测试函数（保留但不自动运行）
 async function testDatabase() {
   console.log('开始数据库测试...')
   console.log('测试数据:', testData)
@@ -94,7 +94,4 @@ async function testDatabase() {
   }
 }
 
-// 运行测试
-testDatabase()
-
-export { supabase }
+export { supabase, testDatabase }
