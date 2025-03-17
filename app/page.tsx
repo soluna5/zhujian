@@ -91,6 +91,9 @@ export default function Home() {
                 width={500}
                 height={600}
                 className="object-cover"
+                priority
+                quality={75}
+                loading="eager"
               />
             </div>
             <div className="space-y-6">
@@ -114,6 +117,8 @@ export default function Home() {
                 width={500}
                 height={600}
                 className="object-cover"
+                quality={75}
+                loading="eager"
               />
             </div>
             <div>

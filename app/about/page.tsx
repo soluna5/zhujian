@@ -19,6 +19,9 @@ export default function AboutPage() {
                 width={500}
                 height={600}
                 className="object-cover"
+                priority
+                quality={75}
+                loading="eager"
               />
             </div>
             <div className="space-y-6">
@@ -42,6 +45,8 @@ export default function AboutPage() {
                   width={80}
                   height={80}
                   className="object-cover rounded-full"
+                  quality={75}
+                  loading="eager"
                 />
               </div>
               <h3 className="font-playfair text-xl mb-3">“天”</h3>
@@ -57,6 +62,8 @@ export default function AboutPage() {
                   width={80}
                   height={80}
                   className="object-cover rounded-full"
+                  quality={75}
+                  loading="eager"
                 />
               </div>
               <h3 className="font-playfair text-xl mb-3">“地”</h3>
@@ -72,6 +79,8 @@ export default function AboutPage() {
                   width={80}
                   height={80}
                   className="object-cover rounded-full"
+                  quality={75}
+                  loading="eager"
                 />
               </div>
               <h3 className="font-playfair text-xl mb-3">“人”</h3>

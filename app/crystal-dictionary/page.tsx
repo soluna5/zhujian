@@ -19,6 +19,9 @@ export default function CrystalDictionary() {
                   alt={crystal.name}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-300"
+                  quality={75}
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
               <div className="space-y-4">
