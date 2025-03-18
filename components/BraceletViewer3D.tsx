@@ -51,7 +51,15 @@ const BraceletViewer = ({ size, beads }: { size: string, beads: Bead[] }) => {
   return (
     <div className="relative w-full aspect-square bg-[#f8f5f0] rounded-lg overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className={`relative w-[${containerSize}px] h-[${containerSize}px]`}>
+        <div 
+          className="relative"
+          style={{
+            width: `${containerSize}px`,
+            height: `${containerSize}px`,
+            minWidth: `${containerSize}px`,
+            minHeight: `${containerSize}px`,
+          }}
+        >
           {sortedBeads.map((bead, index) => {
             // 计算珠子在圆形上的位置
             const angle = (index / sortedBeads.length) * Math.PI * 2;
@@ -160,4 +168,3 @@ const BraceletViewer3D: React.FC<BraceletViewer3DProps> = (props) => {
 };
 
 export default BraceletViewer3D;
-

@@ -1001,7 +1001,7 @@ export default function CreatePage() {
                     <div className="text-2xl md:text-3xl font-medium mb-6 md:mb-8 text-center">我的手链</div>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
                       <div>
-                        <div className="relative bracelet-preview max-w-[300px] mx-auto">
+                        <div className="relative bracelet-preview w-full max-w-[300px] mx-auto aspect-square">
                           <BraceletViewer3D
                             size={braceletSize}
                             destinyStones={[bracelet.crystals[0]]}
