@@ -244,16 +244,21 @@ export default function CreatePage() {
         throw new Error('无法找到手链预览元素')
       }
 
+      // 获取设备宽度
+      const isMobile = window.innerWidth < 768
+      const scale = isMobile ? 1 : 0.75 // 移动设备使用更大的缩放比例
+      const maxSize = isMobile ? 400 : 800 // 移动设备限制最大尺寸
+
       const canvas = await html2canvas(braceletPreview, {
         backgroundColor: null,
-        scale: 0.75,
+        scale: scale,
         useCORS: true,
         allowTaint: true,
         logging: false,
         removeContainer: true,
         imageTimeout: 15000,
-        width: Math.min(braceletPreview.offsetWidth, 800),
-        height: Math.min(braceletPreview.offsetHeight, 800),
+        width: Math.min(braceletPreview.offsetWidth, maxSize),
+        height: Math.min(braceletPreview.offsetHeight, maxSize),
         foreignObjectRendering: false,
         ignoreElements: (element) => {
           return element.classList.contains('ignore-capture')
@@ -261,8 +266,8 @@ export default function CreatePage() {
         onclone: (document, element) => {
           const images = element.getElementsByTagName('img')
           for (let img of images) {
-            img.style.maxWidth = '200px'
-            img.style.maxHeight = '200px'
+            img.style.maxWidth = isMobile ? '150px' : '200px'
+            img.style.maxHeight = isMobile ? '150px' : '200px'
             if (img.src.includes('data:image')) {
               img.style.imageRendering = 'optimizeSpeed'
             }
@@ -992,11 +997,11 @@ export default function CreatePage() {
                 <p className="text-[#666666] mb-8">请确认设计并提交您的订单信息，身份ID在订单提交后失效，我们将尽快为您制作。</p>
 
                 {bracelet && (
-                  <div className="mb-8 p-6 bg-[#f8f5f0] rounded-lg">
-                    <div className="text-3xl font-medium mb-8 text-center">我的手链</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="mb-8 p-4 md:p-6 bg-[#f8f5f0] rounded-lg">
+                    <div className="text-2xl md:text-3xl font-medium mb-6 md:mb-8 text-center">我的手链</div>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
                       <div>
-                        <div className="relative bracelet-preview">
+                        <div className="relative bracelet-preview max-w-[300px] mx-auto">
                           <BraceletViewer3D
                             size={braceletSize}
                             destinyStones={[bracelet.crystals[0]]}

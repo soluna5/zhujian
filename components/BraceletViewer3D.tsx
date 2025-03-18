@@ -23,8 +23,13 @@ interface BraceletViewer3DProps {
 }
 
 const BraceletViewer = ({ size, beads }: { size: string, beads: Bead[] }) => {
-  // 根据尺寸设置珠子大小
-  const beadSize = size === "large" ? 34 : size === "medium" ? 28 : 20;
+  // 根据尺寸设置珠子大小，移动端尺寸稍小
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const beadSize = size === "large" 
+    ? (isMobile ? 28 : 34) 
+    : size === "medium" 
+    ? (isMobile ? 24 : 28) 
+    : (isMobile ? 18 : 20);
   
   // 对珠子按位置排序，但对于粗手链，把功能石垫片放在最后渲染（置于顶层）
   const sortedBeads = [...beads].sort((a, b) => {
@@ -35,78 +40,74 @@ const BraceletViewer = ({ size, beads }: { size: string, beads: Bead[] }) => {
     return a.position - b.position;
   });
   
+  // 根据设备类型调整容器尺寸
+  const containerSize = isMobile ? 280 : 300;
+  const radius = size === "large" 
+    ? (isMobile ? 90 : 103) 
+    : size === "medium" 
+    ? (isMobile ? 105 : 120) 
+    : (isMobile ? 115 : 130);
+  
   return (
-    <div className="relative w-full h-[400px] bg-[#f8f5f0] rounded-lg overflow-hidden">
+    <div className="relative w-full aspect-square bg-[#f8f5f0] rounded-lg overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-[300px] h-[300px]">
+        <div className={`relative w-[${containerSize}px] h-[${containerSize}px]`}>
           {sortedBeads.map((bead, index) => {
             // 计算珠子在圆形上的位置
             const angle = (index / sortedBeads.length) * Math.PI * 2;
-            // 根据手链尺寸调整半径，粗手链和中等手链更紧凑
-            const radius = size === "large" ? 103 : size === "medium" ? 120 : 130;
             
             // 计算珠子尺寸和位置
             const isRound = bead.shape === "round";
             // 中等手链的功能石设置为一个正常尺寸，一个小尺寸
             let currentBeadSize = beadSize;
             if (size === "medium" && bead.type === "function" && bead.shape === "round") {
-              // 第一个功能石正常尺寸，第二个功能石小一些
               const funcStones = sortedBeads.filter(b => b.type === "function" && b.shape === "round");
               const isFirstFuncStone = funcStones[0].position === bead.position;
-              currentBeadSize = isFirstFuncStone ? 28 : 22; // 第一个28px，第二个22px
+              currentBeadSize = isFirstFuncStone 
+                ? (isMobile ? 24 : 28) 
+                : (isMobile ? 20 : 22);
             }
             
             let containerWidth = isRound ? currentBeadSize : currentBeadSize / 2.5;
             const containerHeight = currentBeadSize;
             
             let rotation = 0;
-            let adjustedLeft = Math.cos(angle) * radius + 150 - containerWidth/2;
-            let adjustedTop = Math.sin(angle) * radius + 150 - containerHeight/2;
+            let adjustedLeft = Math.cos(angle) * radius + (containerSize/2) - containerWidth/2;
+            let adjustedTop = Math.sin(angle) * radius + (containerSize/2) - containerHeight/2;
             
             if (bead.shape === "spacer" && index > 0) {
               // 计算前一个珠子的位置
               const prevAngle = ((index - 1) / sortedBeads.length) * Math.PI * 2;
-              const prevLeft = Math.cos(prevAngle) * radius + 150;
-              const prevTop = Math.sin(prevAngle) * radius + 150;
+              const prevLeft = Math.cos(prevAngle) * radius + (containerSize/2);
+              const prevTop = Math.sin(prevAngle) * radius + (containerSize/2);
               
               // 计算后一个珠子的位置
               const nextAngle = ((index + 1) % sortedBeads.length) / sortedBeads.length * Math.PI * 2;
-              const nextLeft = Math.cos(nextAngle) * radius + 150;
-              const nextTop = Math.sin(nextAngle) * radius + 150;
+              const nextLeft = Math.cos(nextAngle) * radius + (containerSize/2);
+              const nextTop = Math.sin(nextAngle) * radius + (containerSize/2);
               
               // 计算两个圆珠之间的方向向量
               const dx = nextLeft - prevLeft;
               const dy = nextTop - prevTop;
               const distance = Math.sqrt(dx * dx + dy * dy);
               
-              // 计算垫片的宽度应该是多少才能刚好填充两个圆珠之间的间隙
-              // 考虑圆珠的半径和垫片的宽度
+              // 计算垫片的宽度
               const beadRadius = currentBeadSize / 2;
-              const gapDistance = distance - beadRadius * 2; // 两个圆珠之间的实际间隙
-              
-              // 调整垫片的宽度，使其更好地填充间隙，但保持窄一些
-              const idealWidth = gapDistance * 0.8; // 填充80%的间隙
+              const gapDistance = distance - beadRadius * 2;
+              const idealWidth = gapDistance * (isMobile ? 0.7 : 0.8); // 移动端垫片稍窄
               
               // 计算两个圆珠的中点
               const centerX = (prevLeft + nextLeft) / 2;
               const centerY = (prevTop + nextTop) / 2;
               
-              // 直接将垫片放在中点位置
               adjustedLeft = centerX - idealWidth/2;
               adjustedTop = centerY - containerHeight/2;
               
-              // 计算切线角度（垂直于半径方向）
               const tangentAngle = Math.atan2(dy, dx) * (180/Math.PI);
-              
-              // 根据手链尺寸和垫片类型决定旋转方向
-              // 对于粗手链的功能石垫片，我们需要垂直于切线方向（额外旋转90度）
               const extraRotation = (size === "large" && bead.type === "function") ? 90 : 0;
               rotation = tangentAngle + extraRotation;
               
-              // 确保角度在合理范围内
               if (rotation > 360) rotation -= 360;
-              
-              // 更新容器宽度
               containerWidth = idealWidth;
             }
 
@@ -128,6 +129,7 @@ const BraceletViewer = ({ size, beads }: { size: string, beads: Bead[] }) => {
                   width={currentBeadSize}
                   height={currentBeadSize}
                   className={`${isRound ? 'rounded-full' : 'rounded-[40%]'} object-cover w-full h-full`}
+                  priority={true}
                 />
               </div>
             );
