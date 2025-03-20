@@ -65,6 +65,8 @@ type Bracelet = {
   imageUrl: string
   size: BraceletSize
   crystalImages: string[]
+  name?: string
+  description?: string
 }
 
 // 添加动画用的水晶类型
@@ -113,8 +115,7 @@ export default function CreatePage() {
     medium: undefined,
     small: undefined
   })
-  const [braceletImageUrl, setBraceletImageUrl] = useState<string>("")
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [isNextLoading, setIsNextLoading] = useState(false)
 
   useEffect(() => {
     // Check for verified auth key
@@ -131,7 +132,32 @@ export default function CreatePage() {
   }, [router, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'birthTime') {
+      // 验证日期格式
+      const dateValue = e.target.value;
+      if (!dateValue) return;
+      
+      try {
+        // 尝试创建日期对象
+        const date = new Date(dateValue);
+        if (isNaN(date.getTime())) {
+          throw new Error('Invalid date');
+        }
+        
+        // 如果日期有效，更新状态
+        setFormData(prev => ({ ...prev, [e.target.name]: dateValue }));
+      } catch (error) {
+        console.error('Invalid date format:', error);
+        // 可以在这里添加错误提示
+        toast({
+          title: "日期格式错误",
+          description: "请输入有效的日期和时间",
+          variant: "destructive",
+        });
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    }
   }
 
   const handleSelectChange = (name: string, value: string) => {
@@ -182,18 +208,33 @@ export default function CreatePage() {
 
   const handleNext = async () => {
     if (!validateStep(currentStep)) return
-
-    if (currentStep === 2) {
-      try {
-        // 清除之前的布局缓存
+    
+    setIsNextLoading(true)
+    
+    try {
+      if (currentStep === 2) {
+        // 清除之前的手链数据和布局缓存
+        setBracelet(null)
         setBraceletLayouts({
           large: undefined,
           medium: undefined,
           small: undefined
-        });
+        })
         
-        // 先生成手链数据
-        const newBracelet = generateBracelet(formData)
+        // 首先创建新的对话
+        const conversationResponse = await fetch('/api/bracelet/conversation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!conversationResponse.ok) {
+          throw new Error('创建对话失败');
+        }
+        
+        // 生成手链数据
+        const newBracelet = await generateBracelet(formData)
         
         // 设置手链数据并显示动画
         setBracelet(newBracelet)
@@ -211,34 +252,59 @@ export default function CreatePage() {
           }, 100)
         })
         
-        // 进入下一步
-        setCurrentStep(prev => prev + 1)
-      } catch (error) {
-        console.error('Error generating bracelet:', error)
-        toast({
-          title: "生成失败",
-          description: "抱歉，生成手链时出现错误，请稍后重试。",
-          variant: "destructive"
-        })
-      } finally {
+        // 隐藏动画并进入下一步
         setShowAnimation(false)
+        setCurrentStep(prev => prev + 1)
+      } else {
+        setCurrentStep(prev => prev + 1)
       }
-      return
+    } catch (error) {
+      console.error('Error generating bracelet:', error)
+      toast({
+        title: "生成失败",
+        description: "抱歉，生成手链时出现错误，请稍后重试。",
+        variant: "destructive"
+      })
+      setShowAnimation(false)
+    } finally {
+      setIsNextLoading(false)
     }
-
-    setCurrentStep(prev => prev + 1)
   }
 
   const handleBack = () => {
     setCurrentStep(currentStep - 1)
   }
 
-  // 预生成图片的函数
-  const generateBraceletImage = async () => {
-    if (isGeneratingImage) return
-    setIsGeneratingImage(true)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setOrderStatus("loading")
 
     try {
+      // 验证手围和订单编号
+      if (!wristSize || !orderNumber || !bracelet) {
+        toast({
+          title: "请填写完整信息",
+          description: "请确保您已填写手围和订单编号。",
+          variant: "destructive",
+        })
+        setOrderStatus("idle")
+        return
+      }
+
+      // 获取已验证的身份ID
+      const verifiedAuthKey = localStorage.getItem("verifiedAuthKey")
+      if (!verifiedAuthKey) {
+        toast({
+          title: "身份验证失败",
+          description: "请重新验证身份ID。",
+          variant: "destructive",
+        })
+        setOrderStatus("idle")
+        router.push("/verify-order")
+        return
+      }
+
+      // 生成手链图片
       const braceletPreview = document.querySelector('.bracelet-preview') as HTMLDivElement
       if (!braceletPreview) {
         throw new Error('无法找到手链预览元素')
@@ -278,65 +344,6 @@ export default function CreatePage() {
       const imageUrl = canvas.toDataURL('image/webp', 0.2)
       if (!imageUrl || imageUrl === 'data:,') {
         throw new Error('生成图片URL失败')
-      }
-
-      setBraceletImageUrl(imageUrl)
-      return imageUrl
-    } catch (error) {
-      console.error('生成图片失败:', error)
-      throw error
-    } finally {
-      setIsGeneratingImage(false)
-    }
-  }
-
-  // 在进入第4步时预生成图片
-  useEffect(() => {
-    if (currentStep === 4 && !braceletImageUrl) {
-      generateBraceletImage().catch(console.error)
-    }
-  }, [currentStep, braceletImageUrl])
-
-  // 预加载感谢页面
-  useEffect(() => {
-    if (currentStep === 4) {
-      router.prefetch('/thank-you')
-    }
-  }, [currentStep, router])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setOrderStatus("loading")
-
-    try {
-      // 验证手围和订单编号
-      if (!wristSize || !orderNumber || !bracelet) {
-        toast({
-          title: "请填写完整信息",
-          description: "请确保您已填写手围和订单编号。",
-          variant: "destructive",
-        })
-        setOrderStatus("idle")
-        return
-      }
-
-      // 获取已验证的身份ID
-      const verifiedAuthKey = localStorage.getItem("verifiedAuthKey")
-      if (!verifiedAuthKey) {
-        toast({
-          title: "身份验证失败",
-          description: "请重新验证身份ID。",
-          variant: "destructive",
-        })
-        setOrderStatus("idle")
-        router.push("/verify-order")
-        return
-      }
-
-      // 使用已生成的图片或重新生成
-      const imageUrl = braceletImageUrl || await generateBraceletImage()
-      if (!imageUrl) {
-        throw new Error('生成图片失败')
       }
 
       // 准备订单数据
@@ -383,7 +390,7 @@ export default function CreatePage() {
     setBraceletSize(size);
   };
 
-  const generateBracelet = (formData: FormData): Bracelet => {
+  const generateBracelet = async (formData: FormData): Promise<Bracelet> => {
     const baZiResult = calculateBaZi(formData.birthTime);
     
     // 将用户需求映射到 PrimaryNeed 枚举
@@ -441,26 +448,107 @@ export default function CreatePage() {
       impressionMap[formData.impression] || Impression.WARM,
       potentialMap[formData.potential] || Potential.EMPATHY,
       healthIssueMap[formData.healthIssue] || HealthIssue.STRESS,
-      formData.birthTime, // 添加出生日期时间参数
-      [] // 没有排除的水晶
+      formData.birthTime,
+      []
     );
-    
-    // 返回手链数据
-    return {
-      crystals: [selectedCrystals.destinyCrystal, selectedCrystals.functionalCrystal, selectedCrystals.correctiveCrystal].filter(Boolean) as Crystal[],
-      properties: [
-        { title: "命运石", description: selectedCrystals.destinyCrystal?.description || "" },
-        { title: "功能石", description: selectedCrystals.functionalCrystal?.description || "" },
-        { title: "修正石", description: selectedCrystals.correctiveCrystal?.description || "" }
-      ],
-      imageUrl: "/images/bracelet-preview.jpg",
-      size: braceletSize,
-      crystalImages: [
-        selectedCrystals.destinyCrystal?.images.raw || "",
-        selectedCrystals.functionalCrystal?.images.raw || "",
-        selectedCrystals.correctiveCrystal?.images.raw || ""
-      ]
-    };
+
+    // 首先获取会话ID
+    try {
+      const conversationResponse = await fetch('/api/bracelet/conversation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const conversationData = await conversationResponse.json();
+      
+      if (!conversationData.conversation_id) {
+        throw new Error('获取会话ID失败');
+      }
+
+      // 然后生成手链描述
+      const response = await fetch('/api/bracelet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          crystals: selectedCrystals.destinyCrystal ? 
+            [
+              selectedCrystals.destinyCrystal.name,
+              selectedCrystals.functionalCrystal?.name,
+              selectedCrystals.correctiveCrystal?.name
+            ].filter(Boolean) : [],
+          primaryNeed: formData.primaryNeed,
+          correctiveSituation: formData.correctiveSituation,
+          conversationId: conversationData.conversation_id,
+          instructions: "请创作一首意境优美的古风诗作：1. 以自然意象暗喻内在能量，不要出现任何佩戴、手链等直白词语 2. 每句4-7字，格律自然 3. 意境空灵，意蕴深远 4. 可以借鉴山水、花鸟、风月等传统意象 5. 整体氛围清雅脱俗"
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('生成手链描述失败');
+      }
+
+      const data = await response.json();
+      
+      if (!data.name || !data.raw_response) {
+        throw new Error('API返回数据格式错误');
+      }
+      
+      // Return bracelet data with name and poem
+      return {
+        crystals: [selectedCrystals.destinyCrystal, selectedCrystals.functionalCrystal, selectedCrystals.correctiveCrystal].filter(Boolean) as Crystal[],
+        properties: [
+          { title: "命运石", description: selectedCrystals.destinyCrystal?.description || "" },
+          { title: "功能石", description: selectedCrystals.functionalCrystal?.description || "" },
+          { title: "修正石", description: selectedCrystals.correctiveCrystal?.description || "" }
+        ],
+        imageUrl: "/images/bracelet-preview.jpg",
+        size: braceletSize,
+        crystalImages: [
+          selectedCrystals.destinyCrystal?.images.raw || "",
+          selectedCrystals.functionalCrystal?.images.raw || "",
+          selectedCrystals.correctiveCrystal?.images.raw || ""
+        ],
+        name: data.name,
+        description: data.raw_response
+          .replace(/\\n/g, '\n') // 替换转义的换行符为实际换行符
+          .split('\n')
+          .filter((line: string) => {
+            const trimmedLine = line.trim();
+            return trimmedLine.length > 0 && 
+                   !trimmedLine.startsWith('注：') &&
+                   !trimmedLine.includes('name') &&
+                   !trimmedLine.includes('raw_response') &&
+                   !trimmedLine.match(/^\s*[\{\}]\s*$/) &&
+                   !trimmedLine.match(/^\s*```.*$/) &&
+                   !trimmedLine.match(/^\s*json\s*$/i);
+          })
+          .map((line: string) => {
+            // 将每行转换为带有样式的 div，移除多余的符号
+            const cleanedLine = line.trim()
+              .replace(/[『』]/g, '')  // 移除『』
+              .replace(/[\{\}]/g, '')  // 移除{}
+              .replace(/[\[\]]/g, '')  // 移除[]
+              .replace(/["""]/g, '')   // 移除引号
+              .replace(/^[\s,]*|[\s,]*$/g, '') // 移除开头和结尾的空白和逗号
+              .replace(/^json\s*$/im, '') // 移除可能的json标记
+              .replace(/^\d+\.\s*/, '') // 移除行首的数字编号
+              .replace(/^\s*```.*?\n/g, '') // 移除开头的 ```json 等标记
+              .replace(/\n```\s*$/g, '') // 移除结尾的 ``` 标记
+              .replace(/\\n/g, ''); // 移除转义的换行符
+            return cleanedLine ? `<div class="poem-line leading-loose tracking-wider mb-2 text-base text-center">${cleanedLine}</div>` : '';
+          })
+          .filter(Boolean) // 移除空行
+          .join('')
+          .trim()
+      };
+    } catch (error) {
+      console.error('Error generating bracelet:', error);
+      throw error;
+    }
   };
 
   // 实现精简版的最优石头选择策略
@@ -666,7 +754,9 @@ export default function CreatePage() {
                         value={formData.birthTime}
                         onChange={handleInputChange}
                         className="border-[#cccccc] rounded-md"
+                        pattern="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}"
                         required
+                        max={new Date().toISOString().slice(0, 16)}
                       />
                       <p className="text-sm text-[#666666]">请填写公历出生时间，系统会自动转换为农历进行八字计算</p>
                     </div>
@@ -864,6 +954,14 @@ export default function CreatePage() {
                           />
                         </div>
 
+                        <div className="mt-8 space-y-4 bg-[#f8f5f0] p-6 rounded-lg">
+                          <h3 className="text-2xl font-medium text-center">{bracelet.name || "手链名称生成中..."}</h3>
+                          <div 
+                            className="text-[#666666] text-center italic [&_.poem-line]:mb-2 [&_.poem-line]:block text-base"
+                            dangerouslySetInnerHTML={{ __html: bracelet.description || "简介生成中..." }}
+                          />
+                        </div>
+
                         <div className="mt-8 space-y-6">
                           <div>
                             <div className="text-xl font-medium mb-4">请选择珠子的大小</div>
@@ -998,7 +1096,11 @@ export default function CreatePage() {
 
                 {bracelet && (
                   <div className="mb-8 p-4 md:p-6 bg-[#f8f5f0] rounded-lg">
-                    <div className="text-2xl md:text-3xl font-medium mb-6 md:mb-8 text-center">我的手链</div>
+                    <div className="text-2xl md:text-3xl font-medium mb-4 text-center">{bracelet.name || "手链名称生成中..."}</div>
+                    <div 
+                      className="text-[#666666] text-center italic mb-6 [&_.poem-line]:mb-2 [&_.poem-line]:block text-base"
+                      dangerouslySetInnerHTML={{ __html: bracelet.description || "简介生成中..." }}
+                    />
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
                       <div>
                         <div className="relative bracelet-preview w-full max-w-[300px] mx-auto aspect-square">
@@ -1123,8 +1225,16 @@ export default function CreatePage() {
                   type="button"
                   onClick={handleNext}
                   className="ml-auto bg-[#333333] hover:bg-[#555555] text-white"
+                  disabled={isNextLoading}
                 >
-                  下一步
+                  {isNextLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      连接大模型...
+                    </div>
+                  ) : (
+                    "下一步"
+                  )}
                 </Button>
               )}
             </div>
