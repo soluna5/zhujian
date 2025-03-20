@@ -113,7 +113,10 @@ const BraceletViewer = ({ size, beads }: { size: string, beads: Bead[] }) => {
               
               const tangentAngle = Math.atan2(dy, dx) * (180/Math.PI);
               const extraRotation = (size === "large" && bead.type === "function") ? 90 : 0;
-              rotation = tangentAngle + extraRotation;
+              
+              // 检查是否接近垂直方向（允许5度的误差）
+              const isVertical = Math.abs(Math.abs(tangentAngle) - 90) < 5;
+              rotation = isVertical ? 90 : tangentAngle + extraRotation;
               
               if (rotation > 360) rotation -= 360;
               containerWidth = idealWidth;
@@ -151,20 +154,25 @@ const BraceletViewer = ({ size, beads }: { size: string, beads: Bead[] }) => {
 const BraceletViewer3D: React.FC<BraceletViewer3DProps> = (props) => {
   const { size, destinyStones, functionalStones, correctiveStones, layout, onLayoutGenerated } = props;
   
-  // 如果已有布局就使用现有布局，否则生成新布局
-  const beads = layout || (() => {
-    const newLayout = generateBeadLayout({
-      size,
-      destinyStones,
-      functionalStones,
-      correctiveStones
-    });
-    // 通知父组件新生成的布局
-    onLayoutGenerated?.(newLayout);
-    return newLayout;
-  })();
+  // 使用 useEffect 来处理布局生成和状态更新
+  React.useEffect(() => {
+    if (!layout) {
+      const newLayout = generateBeadLayout({
+        size,
+        destinyStones,
+        functionalStones,
+        correctiveStones
+      });
+      onLayoutGenerated?.(newLayout);
+    }
+  }, [size, destinyStones, functionalStones, correctiveStones, layout, onLayoutGenerated]);
   
-  return <BraceletViewer size={size} beads={beads} />;
+  // 如果没有布局，显示加载状态
+  if (!layout) {
+    return <div className="w-full h-full bg-gray-100 animate-pulse rounded-lg" />;
+  }
+  
+  return <BraceletViewer size={size} beads={layout} />;
 };
 
 export default BraceletViewer3D;
