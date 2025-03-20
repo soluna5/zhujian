@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 const BAIDU_API_KEY = process.env.BAIDU_API_KEY;
-const BAIDU_APP_ID = "fe85d5ba-4199-4fbc-b842-90c09abe9fae";
+const BAIDU_APP_ID = process.env.BAIDU_APP_ID;
 
 export async function POST(req: NextRequest) {
   try {
