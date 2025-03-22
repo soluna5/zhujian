@@ -300,61 +300,7 @@ export const crystalData: Crystal[] = [
     },
     incompatibleWith: ["紫水晶"]
   },
-  // 黑曜石 - 强化保护和接地特性
-  {
-    id: "black_obsidian",
-    name: "黑曜石",
-    description: "黑曜石是一种强大的保护石，能有效隔绝外界的负面能量，为使用者提供坚实的精神屏障。黑曜石如同能量之镜，帮助使用者直面内在阴影，促进自我认知和成长。",
-    images: {
-      spacer: "/images/crystals/black_obsidian/spacer.png",
-      round: "/images/crystals/black_obsidian/round.png",
-      raw: "/images/crystals/black_obsidian/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["水", "金"],
-      unsupportiveElements: ["火", "木"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        protection: true,
-        relationship: false,
-        wealth: false,
-        balance: false,
-        career: false
-      },
-      impressions: {
-        reliable: true,    // B沉稳可靠的专业权威感
-        insightful: false, // D洞若观火的冷静洞察力
-        warm: false,       // A如沐春风般的温暖亲和力
-        charming: false    // C锋芒毕露的个人魅力值
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        energySensitive: true,
-        indecisive: false,
-        fatigue: false,
-        socialDrain: false
-      },
-      potentials: {
-        decision: true,    // B理性决策力
-        intuition: false,  // D直觉敏锐度
-        empathy: false,    // A细腻共情力
-        expression: false, // C卓越表达力
-        efficiency: false  // E高效行动力
-      },
-      healthIssues: {
-        stress: true,      // A长期压力/焦虑
-        sleep: false,
-        immunity: false,
-        circulation: false,
-        respiratory: false,
-        mood: false,
-        hormonal: false
-      }
-    },
-    incompatibleWith: ["紫水晶", "月光石"]
-  },
+  
   // 月光石
   {
     id: "yuelongshi",
@@ -442,7 +388,7 @@ export const crystalData: Crystal[] = [
     correctiveAttributes: {
       correctiveProperties: {
         socialDrain: false,
-        indecisive: true,
+        indecisive: false,
         energySensitive: false,
         fatigue: false
       },
@@ -458,12 +404,12 @@ export const crystalData: Crystal[] = [
         sleep: false,
         immunity: false,
         circulation: false,
-        respiratory: true, // E呼吸系统不适
+        respiratory: false, // E呼吸系统不适
         mood: false,
         hormonal: false
       }
     },
-    incompatibleWith: ["粉晶", "绿松石"]
+    incompatibleWith: ["粉晶"]
   },
   
   // 红玛瑙 - 强化勇气和活力特性
@@ -497,7 +443,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        fatigue: true,
+        fatigue: false,
         indecisive: false,
         socialDrain: false,
         energySensitive: false
@@ -513,7 +459,7 @@ export const crystalData: Crystal[] = [
         stress: false,
         sleep: false,
         immunity: false,
-        circulation: true, // D血液循环不畅
+        circulation: false, // D血液循环不畅
         respiratory: false,
         mood: false,
         hormonal: false
@@ -610,7 +556,7 @@ export const crystalData: Crystal[] = [
     correctiveAttributes: {
       correctiveProperties: {
         indecisive: false,
-        energySensitive: true,
+        energySensitive: false,
         fatigue: false,
         socialDrain: false
       },
@@ -624,7 +570,7 @@ export const crystalData: Crystal[] = [
       healthIssues: {
         stress: false,
         sleep: false,
-        immunity: true,    // C免疫力低下
+        immunity: false,    // C免疫力低下
         circulation: false,
         respiratory: false,
         mood: false,
@@ -665,7 +611,7 @@ export const crystalData: Crystal[] = [
     correctiveAttributes: {
       correctiveProperties: {
         socialDrain: false,
-        indecisive: true,
+        indecisive: false,
         fatigue: false,
         energySensitive: false
       },
@@ -677,11 +623,11 @@ export const crystalData: Crystal[] = [
         efficiency: false  // E高效行动力
       },
       healthIssues: {
-        stress: true,      // A长期压力/焦虑
+        stress: false,      // A长期压力/焦虑
         sleep: false,
         immunity: false,
         circulation: false,
-        respiratory: true, // E呼吸系统不适
+        respiratory: false, // E呼吸系统不适
         mood: false,
         hormonal: false
       }
@@ -719,8 +665,8 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        fatigue: true,
-        indecisive: true,
+        fatigue: false,
+        indecisive: false,
         socialDrain: false,
         energySensitive: false
       },
@@ -735,9 +681,9 @@ export const crystalData: Crystal[] = [
         stress: false,
         sleep: false,
         immunity: false,
-        circulation: true, // D血液循环不畅
+        circulation: false, // D血液循环不畅
         respiratory: false,
-        mood: true,        // F情绪低落/缺乏活力
+        mood: false,        // F情绪低落/缺乏活力
         hormonal: false
       }
     },
@@ -800,61 +746,6 @@ export const crystalData: Crystal[] = [
   },
   
   
-  // 绿松石
-  {
-    id: "turquoise",
-    name: "绿松石",
-    description: "绿松石是古老的保护石，能为使用者带来好运和内心的平静。绿松石可以增强沟通和创造力，是旅行者的守护石，能在人生旅途中提供指引。",
-    images: {
-      spacer: "/images/crystals/turquoise/spacer.png",
-      round: "/images/crystals/turquoise/round.png",
-      raw: "/images/crystals/turquoise/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["水", "木"],
-      unsupportiveElements: ["火"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        protection: true,
-        relationship: true,
-        wealth: false,
-        balance: false,
-        career: false
-      },
-      impressions: {
-        warm: true,        // A如沐春风般的温暖亲和力
-        insightful: true,  // D洞若观火的冷静洞察力
-        reliable: false,   // B沉稳可靠的专业权威感
-        charming: false    // C锋芒毕露的个人魅力值
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        socialDrain: true,
-        energySensitive: true,
-        fatigue: false,
-        indecisive: false
-      },
-      potentials: {
-        expression: true,  // C卓越表达力
-        empathy: true,     // A细腻共情力
-        decision: false,   // B理性决策力
-        intuition: false,  // D直觉敏锐度
-        efficiency: false  // E高效行动力
-      },
-      healthIssues: {
-        stress: false,
-        sleep: false,
-        immunity: false,
-        circulation: false,
-        respiratory: true, // E呼吸系统不适
-        mood: true,        // F情绪低落/缺乏活力
-        hormonal: false
-      }
-    },
-    incompatibleWith: ["青金石"]
-  },
   // 东陵玉
   {
     id: "dongling_jade",
@@ -941,7 +832,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        fatigue: true,
+        fatigue: false,
         indecisive: false,
         socialDrain: false,
         energySensitive: false
@@ -954,8 +845,8 @@ export const crystalData: Crystal[] = [
         intuition: false   // D直觉敏锐度
       },
       healthIssues: {
-        immunity: true,    // C免疫力低下
-        mood: true,        // F情绪低落/缺乏活力
+        immunity: false,    // C免疫力低下
+        mood: false,        // F情绪低落/缺乏活力
         hormonal: false,   // G内分泌失调
         stress: false,
         sleep: false,
@@ -1000,7 +891,7 @@ export const crystalData: Crystal[] = [
         socialDrain: false,
         energySensitive: false,
         fatigue: false,
-        indecisive: true
+        indecisive: false
       },
       potentials: {
         expression: true,  // C卓越表达力
@@ -1014,7 +905,7 @@ export const crystalData: Crystal[] = [
         sleep: false,
         immunity: false,
         circulation: false,
-        respiratory: true,
+        respiratory: false,
         mood: false,
         hormonal: false
       }
@@ -1052,9 +943,9 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        energySensitive: true,
+        energySensitive: false,
         fatigue: false,
-        indecisive: true,
+        indecisive: false,
         socialDrain: false
       },
       potentials: {
@@ -1065,8 +956,8 @@ export const crystalData: Crystal[] = [
         efficiency: false  // E高效行动力
       },
       healthIssues: {
-        stress: true,      // A长期压力/焦虑
-        sleep: true,       // B睡眠质量不佳
+        stress: false,      // A长期压力/焦虑
+        sleep: false,       // B睡眠质量不佳
         immunity: false,
         circulation: false,
         respiratory: false,
@@ -1109,7 +1000,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        socialDrain: true,
+        socialDrain: false,
         fatigue: false,
         indecisive: false,
         energySensitive: false
@@ -1124,11 +1015,11 @@ export const crystalData: Crystal[] = [
       healthIssues: {
         stress: false,
         sleep: false,
-        immunity: true,    // C免疫力低下
+        immunity: false,    // C免疫力低下
         circulation: false,
         respiratory: false,
-        mood: true,        // F情绪低落/缺乏活力
-        hormonal: true     // G内分泌失调
+        mood: false,        // F情绪低落/缺乏活力
+        hormonal: false     // G内分泌失调
       }
     },
     incompatibleWith: ["黑碧玺"]
@@ -1164,7 +1055,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        socialDrain: true,
+        socialDrain: false,
         energySensitive: false,
         fatigue: false,
         indecisive: false
@@ -1177,11 +1068,11 @@ export const crystalData: Crystal[] = [
         efficiency: false  // E高效行动力
       },
       healthIssues: {
-        stress: true,      // A长期压力/焦虑
+        stress: false,      // A长期压力/焦虑
         sleep: false,
         immunity: false,
         circulation: false,
-        respiratory: true, // E呼吸系统不适
+        respiratory: false, // E呼吸系统不适
         mood: false,
         hormonal: false
       }
@@ -1219,7 +1110,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        socialDrain: true,
+        socialDrain: false,
         fatigue: false,
         indecisive: false,
         energySensitive: false
@@ -1235,69 +1126,13 @@ export const crystalData: Crystal[] = [
         stress: false,
         sleep: false,
         immunity: false,
-        circulation: true, // D血液循环不畅
+        circulation: false, // D血液循环不畅
         respiratory: false,
-        mood: true,        // F情绪低落/缺乏活力
-        hormonal: true     // G内分泌失调
+        mood: false,        // F情绪低落/缺乏活力
+        hormonal: false     // G内分泌失调
       }
     },
     incompatibleWith: ["黑曜石"]
-  },
-  
-  // 天青石 - 强化精神意识和天使沟通特性
-  {
-    id: "celestite",
-    name: "天青石",
-    description: "天青石能增强精神意识和高维沟通的能力，为使用者带来深层的平静与智慧。天青石可以改善睡眠质量，净化心灵，是冥想和灵修的理想伴侣。",
-    images: {
-      spacer: "/images/crystals/celestite/spacer.png",
-      round: "/images/crystals/celestite/round.png",
-      raw: "/images/crystals/celestite/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["水", "金"],
-      unsupportiveElements: ["火"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        balance: true,
-        protection: false,
-        relationship: false,
-        wealth: false,
-        career: false
-      },
-      impressions: {
-        insightful: true,  // D洞若观火的冷静洞察力
-        warm: false,       // A如沐春风般的温暖亲和力
-        reliable: false,   // B沉稳可靠的专业权威感
-        charming: false    // C锋芒毕露的个人魅力值
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        energySensitive: true,
-        socialDrain: false,
-        fatigue: false,
-        indecisive: false
-      },
-      potentials: {
-        intuition: true,   // D直觉敏锐度
-        empathy: false,    // A细腻共情力
-        decision: false,   // B理性决策力
-        expression: false, // C卓越表达力
-        efficiency: false  // E高效行动力
-      },
-      healthIssues: {
-        stress: true,      // A长期压力/焦虑
-        sleep: true,       // B睡眠质量不佳
-        immunity: false,
-        circulation: false,
-        respiratory: true, // E呼吸系统不适
-        mood: false,
-        hormonal: false
-      }
-    },
-    incompatibleWith: ["红玛瑙", "红碧玉"]
   },
   
   
@@ -1333,7 +1168,7 @@ export const crystalData: Crystal[] = [
     correctiveAttributes: {
       correctiveProperties: {
         indecisive: false,
-        fatigue: true,
+        fatigue: false,
         socialDrain: false,
         energySensitive: false
       },
@@ -1347,10 +1182,10 @@ export const crystalData: Crystal[] = [
       healthIssues: {
         stress: false,
         sleep: false,
-        immunity: true,    // C免疫力低下
-        circulation: true, // D血液循环不畅
+        immunity: false,    // C免疫力低下
+        circulation: false, // D血液循环不畅
         respiratory: false,
-        mood: true,        // F情绪低落/缺乏活力
+        mood: false,        // F情绪低落/缺乏活力
         hormonal: false
       }
     },
@@ -1413,61 +1248,7 @@ export const crystalData: Crystal[] = [
     },
     incompatibleWith: ["黑碧玺"]
   },
-  // 蓝磷灰 - 强化沟通和创造力特性
-  {
-    id: "blue_apatite",
-    name: "蓝磷灰",
-    description: "蓝磷灰是创意与表达的有力催化剂，能显著增强沟通能力。蓝磷灰可以开启智慧之门，促进学习和记忆力的提升，是求知者的理想搭档。",
-    images: {
-      spacer: "/images/crystals/blue_apatite/spacer.png",
-      round: "/images/crystals/blue_apatite/round.png",
-      raw: "/images/crystals/blue_apatite/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["水", "木"],
-      unsupportiveElements: ["火"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        career: true,
-        balance: false,
-        relationship: false,
-        wealth: false,
-        protection: false
-      },
-      impressions: {
-        insightful: true,  // D洞若观火的冷静洞察力
-        charming: false,   // C锋芒毕露的个人魅力值
-        warm: false,       // A如沐春风般的温暖亲和力
-        reliable: false    // B沉稳可靠的专业权威感
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        indecisive: true,
-        energySensitive: false,
-        fatigue: false,
-        socialDrain: false
-      },
-      potentials: {
-        expression: true,  // C卓越表达力
-        intuition: false,  // D直觉敏锐度
-        empathy: false,    // A细腻共情力
-        decision: false,   // B理性决策力
-        efficiency: false  // E高效行动力
-      },
-      healthIssues: {
-        stress: true,
-        sleep: false,
-        immunity: false,
-        circulation: false,
-        respiratory: false,
-        mood: false,
-        hormonal: false
-      }
-    },
-    incompatibleWith: ["红玛瑙"]
-  },
+  
   
   // 黄方解石 - 强化自信和积极能量特性
   {
@@ -1500,10 +1281,10 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        fatigue: true,
+        fatigue: false,
         indecisive: false,
         socialDrain: false,
-        energySensitive: true
+        energySensitive: false
       },
       potentials: {
         efficiency: true,  // E高效行动力
@@ -1515,11 +1296,11 @@ export const crystalData: Crystal[] = [
       healthIssues: {
         stress: false,
         sleep: false,
-        immunity: true,    // C免疫力低下
+        immunity: false,    // C免疫力低下
         circulation: false,
         respiratory: false,
-        mood: true,        // F情绪低落/缺乏活力
-        hormonal: true     // G内分泌失调
+        mood: false,        // F情绪低落/缺乏活力
+        hormonal: false     // G内分泌失调
       }
     },
     incompatibleWith: ["黑曜石"]
@@ -1603,7 +1384,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        energySensitive: true,
+        energySensitive: false,
         indecisive: false,
         fatigue: false,
         socialDrain: false
@@ -1650,7 +1431,7 @@ export const crystalData: Crystal[] = [
     },
     correctiveAttributes: {
       correctiveProperties: {
-        socialDrain: true,
+        socialDrain: false,
         fatigue: false,
         indecisive: false,
         energySensitive: false
@@ -1665,7 +1446,7 @@ export const crystalData: Crystal[] = [
       healthIssues: {
         stress: false,
         sleep: false,
-        immunity: true,    // C免疫力低下
+        immunity: false,    // C免疫力低下
         circulation: false,
         respiratory: false,
         mood: true,        // F情绪低落/缺乏活力

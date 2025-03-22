@@ -46,7 +46,7 @@ function scoreCrystal(
   details['命理分数'] = destinyScore;
   totalScore += destinyScore;
 
-  // 2. 功能属性分数（基于主要功能和初印象的匹配度）
+  // 2. 功能属性分数（基于主要功能、初印象和内在潜能的匹配度）
   let functionalScore = 0;
   if (crystal.functionalAttributes.primaryPurposes[primaryNeed]) {
     functionalScore += 30; // 主要功能匹配
@@ -54,19 +54,19 @@ function scoreCrystal(
   if (crystal.functionalAttributes.impressions?.[desiredImpression]) {
     functionalScore += 10; // 初印象匹配
   }
+  if (crystal.correctiveAttributes.potentials?.[desiredPotential]) {
+    functionalScore += 15; // 内在潜能匹配（增加权重）
+  }
   details['功能分数'] = functionalScore;
   totalScore += functionalScore;
 
-  // 3. 修正属性分数（基于修正属性、潜能和健康问题的匹配度）
+  // 3. 修正属性分数（基于修正属性和健康问题的匹配度）
   let correctiveScore = 0;
   if (crystal.correctiveAttributes.correctiveProperties[situation]) {
-    correctiveScore += 15; // 修正属性匹配
-  }
-  if (crystal.correctiveAttributes.potentials?.[desiredPotential]) {
-    correctiveScore += 8; // 内在潜能匹配
+    correctiveScore += 20; // 修正属性匹配（增加权重）
   }
   if (crystal.correctiveAttributes.healthIssues?.[healthIssue]) {
-    correctiveScore += 7; // 健康问题匹配
+    correctiveScore += 10; // 健康问题匹配（增加权重）
   }
   details['修正分数'] = correctiveScore;
   totalScore += correctiveScore;
@@ -399,6 +399,7 @@ function groupSimilarScores(scoredCrystals: Array<{crystal: Crystal; score: numb
 export function selectFunctionalCrystal(
   primaryNeed: PrimaryNeed,
   desiredImpression: Impression,
+  desiredPotential: Potential, // 新增内在潜能参数
   excludedCrystals: Crystal[] = []
 ): Crystal {
   const scoredCrystals = crystalData
@@ -409,9 +410,9 @@ export function selectFunctionalCrystal(
         favorableElements: [],
         unfavorableElements: [],
         primaryNeed,
-        situation: CommonSituation.FATIGUE, // 默认值
+        situation: CommonSituation.INDECISIVE, // 默认值
         desiredImpression,
-        desiredPotential: Potential.EMPATHY, // 默认值
+        desiredPotential, // 在功能石选择时考虑内在潜能
         healthIssue: HealthIssue.STRESS, // 默认值
         selectedCrystals: excludedCrystals
       });
@@ -433,28 +434,68 @@ export function selectFunctionalCrystal(
 // 更新选择修正石的逻辑
 export function selectCorrectiveCrystal(
   situation: CommonSituation,
-  desiredPotential: Potential,
   healthIssue: HealthIssue,
   excludedCrystals: Crystal[] = []
 ): Crystal {
-  const scoredCrystals = crystalData
-    .filter(crystal => !excludedCrystals.some(excluded => excluded.id === crystal.id))
-    .map(crystal => {
-      const { score, details } = scoreCrystal(crystal, {
-        mainElement: "", // 不考虑命理
-        favorableElements: [],
-        unfavorableElements: [],
-        primaryNeed: PrimaryNeed.BALANCE, // 默认值
-        situation,
-        desiredImpression: Impression.WARM, // 默认值
-        desiredPotential,
-        healthIssue,
-        selectedCrystals: excludedCrystals
-      });
-      
-      console.log(`评分详情 - ${crystal.name}:`, details);
-      return { crystal, score, details };
+  // 定义允许作为修正石的水晶ID列表
+  const allowedCorrectiveCrystalIds = [
+    'zishuijing',    // 紫水晶
+    'fenjing',       // 粉晶
+    'clear_quartz',  // 白水晶
+    'citrine',       // 黄水晶
+    'smoky_quartz',  // 茶晶
+    'strawberry_quartz', // 草莓晶
+    'yuelongshi',    // 月光石
+    'dongling_jade', // 东陵玉
+    'amazonite',     // 天河石
+    'red_rutilated_quartz' // 红纹石
+  ];
+
+  // 首先过滤出允许的修正石
+  const allowedCrystals = crystalData.filter(crystal => 
+    allowedCorrectiveCrystalIds.includes(crystal.id)
+  );
+
+  console.log("允许作为修正石的水晶:", allowedCrystals.map(c => c.name).join(', '));
+
+  if (allowedCrystals.length === 0) {
+    throw new Error("没有找到允许的修正石");
+  }
+
+  // 从允许的修正石中过滤掉已选择的水晶
+  const availableCrystals = allowedCrystals.filter(crystal => 
+    !excludedCrystals.some(excluded => excluded.id === crystal.id)
+  );
+
+  console.log("可用的修正石:", availableCrystals.map(c => c.name).join(', '));
+
+  if (availableCrystals.length === 0) {
+    throw new Error("没有可用的修正石（所有修正石都被排除或不在允许列表中）");
+  }
+
+  // 只对允许的修正石进行评分
+  const scoredCrystals = availableCrystals.map(crystal => {
+    // 确保水晶在允许列表中
+    if (!allowedCorrectiveCrystalIds.includes(crystal.id)) {
+      console.log(`跳过非修正石: ${crystal.name}`);
+      return null;
+    }
+
+    const { score, details } = scoreCrystal(crystal, {
+      mainElement: "", // 不考虑命理
+      favorableElements: [],
+      unfavorableElements: [],
+      primaryNeed: PrimaryNeed.BALANCE, // 默认值
+      situation,
+      desiredImpression: Impression.WARM, // 默认值
+      desiredPotential: Potential.EMPATHY, // 默认值，不再考虑内在潜能
+      healthIssue,
+      selectedCrystals: excludedCrystals
     });
+    
+    console.log(`修正石评分详情 - ${crystal.name}:`, details);
+    return { crystal, score, details };
+  }).filter((item): item is { crystal: Crystal; score: number; details: Record<string, number> } => item !== null);
 
   scoredCrystals.sort((a, b) => b.score - a.score);
   console.log("修正石候选排名:", scoredCrystals.map(c => `${c.crystal.name}(${c.score})`).join(', '));
@@ -463,7 +504,15 @@ export function selectCorrectiveCrystal(
     throw new Error("找不到合适的修正石");
   }
 
-  return scoredCrystals[0].crystal;
+  const selectedCrystal = scoredCrystals[0].crystal;
+  console.log("最终选择的修正石:", selectedCrystal.name);
+
+  // 最后再次检查确保选中的水晶确实在允许列表中
+  if (!allowedCorrectiveCrystalIds.includes(selectedCrystal.id)) {
+    throw new Error(`选中的水晶 ${selectedCrystal.name} 不在允许的修正石列表中`);
+  }
+
+  return selectedCrystal;
 }
 
 // 检查选中的水晶组合是否兼容
@@ -491,7 +540,7 @@ export function selectCrystals(
   desiredImpression: Impression,
   desiredPotential: Potential,
   healthIssue: HealthIssue,
-  birthDateTime: string, // 新增出生日期时间参数
+  birthDateTime: string,
   excludedTypes: string[] = []
 ): {
   destinyCrystal: Crystal;
@@ -503,7 +552,6 @@ export function selectCrystals(
   
   while (attempts < maxAttempts) {
     try {
-      // 选择命运石（传入出生日期时间）
       const destinyCrystal = selectDestinyCrystal(
         mainElement,
         favorableElements,
@@ -516,10 +564,11 @@ export function selectCrystals(
         continue;
       }
 
-      // 选择功能石（加入初印象考虑）
+      // 在功能石选择时传入内在潜能参数
       const functionalCrystal = selectFunctionalCrystal(
         primaryNeed,
         desiredImpression,
+        desiredPotential,
         [destinyCrystal]
       );
 
@@ -528,10 +577,9 @@ export function selectCrystals(
         continue;
       }
 
-      // 选择修正石（加入内在潜能和健康问题考虑）
+      // 修正石选择不再考虑内在潜能
       const correctiveCrystal = selectCorrectiveCrystal(
         situation,
-        desiredPotential,
         healthIssue,
         [destinyCrystal, functionalCrystal]
       );
@@ -541,7 +589,6 @@ export function selectCrystals(
         continue;
       }
 
-      // 检查三颗石头的兼容性
       if (checkCrystalCompatibility([destinyCrystal, functionalCrystal, correctiveCrystal])) {
         return {
           destinyCrystal,
