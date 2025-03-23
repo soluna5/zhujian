@@ -95,24 +95,15 @@ function scoreCrystal(
   details['协同分数'] = synergyScore;
   totalScore += synergyScore;
 
-  // 5. 惩罚项（基于不兼容性和属性冲突）
-  let penaltyScore = 0;
-  // 检查不兼容性
-  selectedCrystals.forEach(selected => {
-    if (crystal.incompatibleWith.includes(selected.id) ||
-        selected.incompatibleWith.includes(crystal.id)) {
-      penaltyScore -= 60; // 不兼容惩罚
+  // 5. 惩罚项
+  // 5.1 忌用神冲突惩罚
+  for (const unfavorable of unfavorableElements) {
+    if (crystal.destinyAttributes.unsupportiveElements.includes(unfavorable)) {
+      // 基础冲突惩罚
+      totalScore -= 60;
+      details['忌用神冲突惩罚'] = -60;
     }
-  });
-  // 检查与忌用神的冲突
-  unfavorableElements.forEach(element => {
-    if (crystal.destinyAttributes.unsupportiveElements.includes(element)) {
-      penaltyScore -= 40; // 属性冲突惩罚
-    }
-  });
-
-  details['惩罚分数'] = penaltyScore;
-  totalScore += penaltyScore;
+  }
 
   return { score: totalScore, details };
 }
@@ -133,90 +124,84 @@ function scoreDestinyCrystal(
   const details: Record<string, number> = {};
   let totalScore = 0;
 
-  // 1. 主元素匹配度
+  // 1. 主元素匹配度（保持低权重）
   let mainElementScore = 0;
   if (crystal.destinyAttributes.supportiveElements.includes(mainElement)) {
-    mainElementScore = 35; // 主元素完全匹配
-  } else if (crystal.destinyAttributes.supportiveElements.some(element => 
-    isElementCompatible(element, mainElement))) {
-    mainElementScore = 20; // 主元素相生
+    mainElementScore = 5;
   }
   details['主元素分数'] = mainElementScore;
   totalScore += mainElementScore;
   
-  // 2. 喜用神匹配度
+  // 2. 喜用神匹配度（增加权重）
   let favorableScore = 0;
   let matchedFavorables = 0;
-  favorableElements.forEach((element, index) => {
+  let favorableGenerationBonus = 0;
+  
+  favorableElements.forEach(element => {
     if (crystal.destinyAttributes.supportiveElements.includes(element)) {
-      favorableScore += 25;
+      favorableScore += 40; // 提高单个喜用神的基础分
       matchedFavorables++;
-      // 根据喜用神的顺序添加微小差异
-      favorableScore += (favorableElements.length - index) * 0.1;
-    } else if (crystal.destinyAttributes.supportiveElements.some(supportive => 
-      isElementCompatible(supportive, element))) {
-      favorableScore += 15; // 相生关系加分
-      // 根据喜用神的顺序添加微小差异
-      favorableScore += (favorableElements.length - index) * 0.05;
-    }
-  });
-  // 匹配喜用神数量的额外奖励
-  if (matchedFavorables > 1) {
-    favorableScore += matchedFavorables * 5; // 每多匹配一个喜用神额外加分
-  }
-  details['喜用神分数'] = favorableScore;
-  totalScore += favorableScore;
-
-  // 3. 忌用神规避度
-  let unfavorableScore = 0;
-  unfavorableElements.forEach((element, index) => {
-    if (!crystal.destinyAttributes.supportiveElements.includes(element)) {
-      unfavorableScore += 20; // 基础规避分
-      // 根据忌用神的顺序添加微小差异
-      unfavorableScore += (unfavorableElements.length - index) * 0.1;
       
-      // 检查是否与忌用神相克
-      if (crystal.destinyAttributes.supportiveElements.some(supportive => 
-        isElementRestraining(supportive, element))) {
-        unfavorableScore += 10; // 相克加分
-        // 根据忌用神的顺序添加微小差异
-        unfavorableScore += (unfavorableElements.length - index) * 0.05;
+      // 检查与主元素的相生关系
+      if (isElementCompatible(element, mainElement)) {
+        favorableGenerationBonus += 15; // 增加相生关系奖励
       }
     }
   });
+  
+  // 匹配喜用神数量的额外奖励
+  if (matchedFavorables > 1) {
+    favorableScore += matchedFavorables * 25; // 增加多匹配的奖励分数
+  }
+  
+  // 添加相生关系奖励
+  favorableScore += favorableGenerationBonus;
+  
+  details['喜用神分数'] = favorableScore;
+  totalScore += favorableScore;
+
+  // 3. 忌用神规避度（增加权重）
+  let unfavorableScore = 0;
+  let unfavorableAvoidanceBonus = 0;
+  
+  unfavorableElements.forEach(element => {
+    if (!crystal.destinyAttributes.supportiveElements.includes(element)) {
+      unfavorableScore += 20; // 提高基础规避分
+      
+      // 检查与主元素的相克关系
+      if (isElementRestraining(element, mainElement)) {
+        unfavorableAvoidanceBonus += 10; // 增加相克关系奖励
+      }
+    }
+  });
+  
+  // 完全规避忌用神的额外奖励
+  if (unfavorableElements.every(element => !crystal.destinyAttributes.supportiveElements.includes(element))) {
+    unfavorableScore += 20; // 增加完全规避的奖励
+  }
+  
+  // 添加相克关系奖励
+  unfavorableScore += unfavorableAvoidanceBonus;
+  
   details['忌用神规避分数'] = unfavorableScore;
   totalScore += unfavorableScore;
 
-  // 4. 五行平衡度
-  const elementBalance = calculateElementBalance(crystal.destinyAttributes.supportiveElements);
-  // 添加基于水晶特性的微小差异
-  const uniqueBalanceModifier = getUniqueBalanceModifier(crystal);
-  const finalElementBalance = elementBalance + uniqueBalanceModifier;
-  details['五行平衡分数'] = finalElementBalance;
-  totalScore += finalElementBalance;
-
-  // 5. 惩罚项
+  // 4. 惩罚项（增加区分度）
   let penaltyScore = 0;
   // 检查与忌用神的直接冲突
-  unfavorableElements.forEach((element, index) => {
+  unfavorableElements.forEach(element => {
     if (crystal.destinyAttributes.unsupportiveElements.includes(element)) {
-      penaltyScore -= 50; // 直接冲突严重惩罚
-      // 根据忌用神的顺序添加微小差异
-      penaltyScore -= (unfavorableElements.length - index) * 0.1;
-    } else if (crystal.destinyAttributes.supportiveElements.some(supportive => 
-      isElementRestrained(supportive, element))) {
-      penaltyScore -= 30; // 被克制惩罚
-      // 根据忌用神的顺序添加微小差异
-      penaltyScore -= (unfavorableElements.length - index) * 0.05;
+      penaltyScore -= 60;
+      
+      // 如果存在相克关系，增加惩罚
+      if (isElementRestraining(element, mainElement)) {
+        penaltyScore -= 25; // 增加相克关系惩罚
+      }
     }
   });
+  
   details['惩罚分数'] = penaltyScore;
   totalScore += penaltyScore;
-
-  // 6. 水晶独特性分数（新增）
-  const uniqueScore = calculateUniqueScore(crystal);
-  details['独特性分数'] = uniqueScore;
-  totalScore += uniqueScore;
 
   return { score: totalScore, details };
 }
@@ -250,58 +235,6 @@ function isElementRestrained(element1: string, element2: string): boolean {
   return isElementRestraining(element2, element1);
 }
 
-// 辅助函数：计算五行平衡度
-function calculateElementBalance(elements: string[]): number {
-  const elementCounts: Record<string, number> = {
-    '木': 0,
-    '火': 0,
-    '土': 0,
-    '金': 0,
-    '水': 0
-  };
-
-  elements.forEach(element => {
-    elementCounts[element]++;
-  });
-
-  // 计算平衡度
-  const totalElements = elements.length;
-  const idealCount = totalElements / 5; // 理想情况下每个元素的数量
-  let balanceScore = 15; // 基础分
-
-  Object.values(elementCounts).forEach(count => {
-    const deviation = Math.abs(count - idealCount);
-    balanceScore -= deviation * 3; // 每偏离理想值一次扣3分
-  });
-
-  return Math.max(balanceScore, 0); // 确保不会出现负分
-}
-
-// 辅助函数：计算水晶的独特性分数
-function calculateUniqueScore(crystal: Crystal): number {
-  let uniqueScore = 0;
-  
-  // 基于水晶ID生成一个稳定但微小的分数调整
-  const hashCode = crystal.id.split('').reduce((acc, char) => {
-    return char.charCodeAt(0) + ((acc << 5) - acc);
-  }, 0);
-  
-  // 将hashCode转换为0.1到0.9之间的小数
-  uniqueScore = (Math.abs(hashCode) % 9 + 1) / 10;
-  
-  // 考虑水晶的功能属性数量
-  const functionalCount = Object.values(crystal.functionalAttributes.primaryPurposes)
-    .filter(Boolean).length;
-  uniqueScore += functionalCount * 0.1;
-  
-  // 考虑水晶的修正属性数量
-  const correctiveCount = Object.values(crystal.correctiveAttributes.correctiveProperties)
-    .filter(Boolean).length;
-  uniqueScore += correctiveCount * 0.1;
-  
-  return uniqueScore;
-}
-
 // 辅助函数：获取基于水晶特性的平衡度修正值
 function getUniqueBalanceModifier(crystal: Crystal): number {
   // 基于水晶的supportiveElements数量生成微小的修正值
@@ -315,7 +248,7 @@ export function selectDestinyCrystal(
   mainElement: string,
   favorableElements: string[],
   unfavorableElements: string[],
-  birthDateTime: string // 新增出生日期时间参数
+  birthDateTime: string
 ): Crystal {
   const scoredCrystals = crystalData.map(crystal => {
     const { score, details } = scoreDestinyCrystal(crystal, {
@@ -365,25 +298,27 @@ function generateSeedFromDateTime(dateTime: string): number {
 
 // 辅助函数：将分数相近的水晶分组
 function groupSimilarScores(scoredCrystals: Array<{crystal: Crystal; score: number; details: Record<string, number>}>): Array<Array<{crystal: Crystal; score: number; details: Record<string, number>}>> {
-  // 首先按分数降序排序
-  scoredCrystals.sort((a, b) => b.score - a.score);
+  // 按分数降序排序
+  const sortedCrystals = [...scoredCrystals].sort((a, b) => b.score - a.score);
   
   const groups: Array<Array<{crystal: Crystal; score: number; details: Record<string, number>}>> = [];
   let currentGroup: Array<{crystal: Crystal; score: number; details: Record<string, number>}> = [];
-  const SCORE_THRESHOLD = 5; // 分数差异阈值
   
-  scoredCrystals.forEach((scored, index) => {
+  sortedCrystals.forEach((crystal, index) => {
     if (index === 0) {
-      currentGroup.push(scored);
+      currentGroup.push(crystal);
     } else {
-      const prevScore = scoredCrystals[index - 1].score;
-      if (Math.abs(prevScore - scored.score) <= SCORE_THRESHOLD) {
-        currentGroup.push(scored);
-      } else {
+      const prevScore = sortedCrystals[index - 1].score;
+      const scoreDiff = prevScore - crystal.score;
+      
+      // 如果分数差异大于2，开始新的分组
+      if (scoreDiff > 2) {
         if (currentGroup.length > 0) {
           groups.push([...currentGroup]);
         }
-        currentGroup = [scored];
+        currentGroup = [crystal];
+      } else {
+        currentGroup.push(crystal);
       }
     }
   });

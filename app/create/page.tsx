@@ -86,7 +86,9 @@ const crystalColorMap: Record<string, string> = {
   "青金石": "#191970",
   "玫瑰石英": "#FFB6C1",
   "海蓝宝": "#4169E1",
-  "绿松石": "#40E0D0"
+  "绿松石": "#40E0D0",
+  "虎眼石": "#B8860B",
+  "紫锂辉": "#DDA0DD"
 }
 
 export default function CreatePage() {
