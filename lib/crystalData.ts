@@ -100,8 +100,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/amethyst/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "木"],
-      unsupportiveElements: ["土"]
+      supportiveElements: ["火", "土"],
+      unsupportiveElements: ["金"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -155,8 +155,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/fenjing/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "土"],
-      unsupportiveElements: ["木"]
+      supportiveElements: ["火", "土"],
+      unsupportiveElements: ["金"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -256,7 +256,7 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/citrine/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["火", "土"],
+      supportiveElements: ["土", "金"],
       unsupportiveElements: ["水"]
     },
     functionalAttributes: {
@@ -313,7 +313,7 @@ export const crystalData: Crystal[] = [
     },
     destinyAttributes: {
       supportiveElements: ["水", "金"],
-      unsupportiveElements: ["土"]
+      unsupportiveElements: ["木"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -367,8 +367,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/qingjinshi/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "金"],
-      unsupportiveElements: ["火"]
+      supportiveElements: ["木", "火"],
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -424,7 +424,7 @@ export const crystalData: Crystal[] = [
     },
     destinyAttributes: {
       supportiveElements: ["火", "土"],
-      unsupportiveElements: ["水"]
+      unsupportiveElements: ["金"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -479,8 +479,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/smoky_quartz/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["土", "水"],
-      unsupportiveElements: ["火"]
+      supportiveElements: ["土", "金"],
+      unsupportiveElements: ["水"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -535,8 +535,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/green_phantom/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["木", "土"],
-      unsupportiveElements: ["金"]
+      supportiveElements: ["木", "火"],
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -646,7 +646,7 @@ export const crystalData: Crystal[] = [
     },
     destinyAttributes: {
       supportiveElements: ["火", "土"],
-      unsupportiveElements: ["水"]
+      unsupportiveElements: ["金"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -700,8 +700,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/red_rutilated_quartz/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["火", "水"],
-      unsupportiveElements: ["水"]
+      supportiveElements: ["火", "土"],
+      unsupportiveElements: ["金"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -757,8 +757,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/dongling_jade/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["木", "土"],
-      unsupportiveElements: ["金"]
+      supportiveElements: ["木", "火"],
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -813,7 +813,7 @@ export const crystalData: Crystal[] = [
     },
     destinyAttributes: {
       supportiveElements: ["木", "火"],
-      unsupportiveElements: ["金"]
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -914,8 +914,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/prehnite/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "木"],
-      unsupportiveElements: ["火"]
+      supportiveElements: ["木", "火"],
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -971,8 +971,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/green_strawberry_quartz/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["木", "水"],
-      unsupportiveElements: ["金"]
+      supportiveElements: ["木", "火"],
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -1081,7 +1081,7 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/rhodonite/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "土"],
+      supportiveElements: ["火", "土"],
       unsupportiveElements: ["金"]
     },
     functionalAttributes: {
@@ -1138,7 +1138,7 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/golden_rutilated_quartz/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["金", "土"],
+      supportiveElements: ["土", "金"],
       unsupportiveElements: ["水"]
     },
     functionalAttributes: {
@@ -1195,7 +1195,7 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/strawberry_quartz/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "土"],
+      supportiveElements: ["火", "土"],
       unsupportiveElements: ["金"]
     },
     functionalAttributes: {
@@ -1252,7 +1252,7 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/yellow_calcite/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["土", "火"],
+      supportiveElements: ["土", "金"],
       unsupportiveElements: ["水"]
     },
     functionalAttributes: {
@@ -1355,8 +1355,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/green_fluorite/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["木", "水"],
-      unsupportiveElements: ["火"]
+      supportiveElements: ["木", "火"],
+      unsupportiveElements: ["土"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -1403,7 +1403,7 @@ export const crystalData: Crystal[] = [
     },
     destinyAttributes: {
       supportiveElements: ["水", "木"],
-      unsupportiveElements: ["土"]
+      unsupportiveElements: ["火"]
     },
     functionalAttributes: {
       primaryPurposes: {
@@ -1458,7 +1458,7 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/tiger_eye/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["土", "火"],
+      supportiveElements: ["土", "金"],
       unsupportiveElements: ["水"]
     },
     functionalAttributes: {
@@ -1514,8 +1514,8 @@ export const crystalData: Crystal[] = [
       raw: "/images/crystals/kunzite/raw.png"
     },
     destinyAttributes: {
-      supportiveElements: ["水", "木"],
-      unsupportiveElements: ["土"]
+      supportiveElements: ["火", "土"],
+      unsupportiveElements: ["金"]
     },
     functionalAttributes: {
       primaryPurposes: {

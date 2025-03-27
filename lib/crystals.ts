@@ -5,6 +5,153 @@ import { crystalData, filterCrystalsByPrimaryNeed, filterCrystalsByCorrectiveSit
 function scoreCrystal(
   crystal: Crystal,
   {
+    favorableElements,
+    unfavorableElements,
+    primaryNeed,
+    situation,
+    desiredImpression,
+    desiredPotential,
+    healthIssue,
+    selectedCrystals = [],
+    isCorrective = false
+  }: {
+    favorableElements: string[];
+    unfavorableElements: string[];
+    primaryNeed: PrimaryNeed;
+    situation: CommonSituation;
+    desiredImpression: Impression;
+    desiredPotential: Potential;
+    healthIssue: HealthIssue;
+    selectedCrystals?: Crystal[];
+    isCorrective?: boolean;
+  }
+): { score: number; details: Record<string, number> } {
+  const details: Record<string, number> = {};
+  let totalScore = 0;
+
+  console.log(`\n检查水晶 ${crystal.name} 的评分：`);
+  console.log('用户选择：', {
+    primaryNeed,
+    desiredImpression,
+    desiredPotential,
+    situation,
+    healthIssue
+  });
+
+  // 1. 命理相关分数（基于五行属性的完全匹配）- 只在非修正石时计算
+  if (!isCorrective) {
+    let destinyScore = 0;
+    // 检查水晶的支持元素是否完全匹配喜用神（主用神和次用神）
+    const crystalElements = crystal.destinyAttributes.supportiveElements;
+    const hasAllFavorableElements = favorableElements.every(element => 
+      crystalElements.includes(element)
+    );
+    
+    if (!hasAllFavorableElements) {
+      // 如果是功能石且包含主用神（喜用神的第一个元素），给予500分
+      if (!isCorrective && crystalElements.includes(favorableElements[0])) {
+        console.log(`功能石 ${crystal.name} 包含主用神 ${favorableElements[0]}，加500分`);
+        destinyScore = 500;
+        details['命理分数'] = destinyScore;
+        totalScore += destinyScore;
+        return { score: totalScore, details };
+      }
+      
+      console.log(`水晶 ${crystal.name} 不完全匹配喜用神，直接排除`);
+      return { score: -1000, details: { '命理分数': -1000 } }; // 不完全匹配则直接返回极低分
+    }
+    
+    destinyScore = 1000; // 完全匹配给予1000分
+    details['命理分数'] = destinyScore;
+    totalScore += destinyScore;
+  }
+
+  // 2. 功能属性分数（只有在完全匹配命理且不是修正石的情况下才考虑）
+  if (!isCorrective) {
+    let functionalScore = 0;
+    if (crystal.functionalAttributes.primaryPurposes[primaryNeed]) {
+      functionalScore += 30;
+      console.log(`匹配主要需求 ${primaryNeed}，加30分`);
+    }
+    if (crystal.functionalAttributes.impressions?.[desiredImpression]) {
+      functionalScore += 20;
+      console.log(`匹配印象属性 ${desiredImpression}，加20分`);
+    }
+    if (crystal.correctiveAttributes.potentials?.[desiredPotential]) {
+      functionalScore += 20;
+      console.log(`匹配潜能属性 ${desiredPotential}，加20分`);
+    }
+    details['功能分数'] = functionalScore;
+    totalScore += functionalScore;
+
+    // 功能石需要检查修正属性来增加协同分数
+    let synergyScore = 0;
+    if (crystal.correctiveAttributes.correctiveProperties[situation]) {
+      synergyScore += 5;
+      console.log(`匹配修正特性 ${situation}，加5分`);
+    }
+    if (crystal.correctiveAttributes.healthIssues?.[healthIssue]) {
+      synergyScore += 5;
+      console.log(`匹配健康问题 ${healthIssue}，加5分`);
+    }
+    details['协同分数'] = synergyScore;
+    totalScore += synergyScore;
+  }
+
+  // 3. 修正属性分数（只有在完全匹配命理且是修正石的情况下才考虑）
+  if (isCorrective) {
+    console.log(`\n检查修正石 ${crystal.name} 的评分：`);
+    console.log('用户选择：', {
+      primaryNeed,
+      desiredImpression,
+      desiredPotential,
+      situation,
+      healthIssue
+    });
+    console.log('功能属性:', JSON.stringify(crystal.functionalAttributes, null, 2));
+    console.log('修正属性:', JSON.stringify(crystal.correctiveAttributes, null, 2));
+    
+    // 修正分数计算
+    let correctiveScore = 0;
+    if (crystal.correctiveAttributes.correctiveProperties[situation]) {
+      correctiveScore += 30;
+      console.log(`匹配修正特性 ${situation}，加30分`);
+    }
+    if (crystal.correctiveAttributes.healthIssues?.[healthIssue]) {
+      correctiveScore += 20;
+      console.log(`匹配健康问题 ${healthIssue}，加20分`);
+    }
+    console.log(`修正分数: ${correctiveScore}`);
+    
+    // 协同分数计算 - 修正石需要检查功能属性
+    let synergyScore = 0;
+    if (crystal.functionalAttributes.primaryPurposes[primaryNeed]) {
+      synergyScore += 5;
+      console.log(`匹配主要需求 ${primaryNeed}，加5分`);
+    }
+    if (crystal.functionalAttributes.impressions?.[desiredImpression]) {
+      synergyScore += 5;
+      console.log(`匹配印象属性 ${desiredImpression}，加5分`);
+    }
+    if (crystal.correctiveAttributes.potentials?.[desiredPotential]) {
+      synergyScore += 5;
+      console.log(`匹配潜能属性 ${desiredPotential}，加5分`);
+    }
+    console.log(`协同分数: ${synergyScore}`);
+    console.log(`总分: ${correctiveScore + synergyScore}\n`);
+    
+    details['修正分数'] = correctiveScore;
+    details['协同分数'] = synergyScore;
+    totalScore = correctiveScore + synergyScore;
+  }
+
+  return { score: totalScore, details };
+}
+
+// 命运石专用打分系统
+function scoreDestinyCrystal(
+  crystal: Crystal,
+  {
     mainElement,
     favorableElements,
     unfavorableElements,
@@ -13,7 +160,7 @@ function scoreCrystal(
     desiredImpression,
     desiredPotential,
     healthIssue,
-    selectedCrystals = []
+    selectedCrystals = []  // 这个参数现在实际上不需要了
   }: {
     mainElement: string;
     favorableElements: string[];
@@ -29,102 +176,18 @@ function scoreCrystal(
   const details: Record<string, number> = {};
   let totalScore = 0;
 
-  // 1. 命理相关分数（基于五行属性的匹配度）
-  let destinyScore = 0;
-  // 支持喜用神
-  favorableElements.forEach(element => {
-    if (crystal.destinyAttributes.supportiveElements.includes(element)) {
-      destinyScore += 8;
-    }
-  });
-  // 不支持忌用神
-  unfavorableElements.forEach(element => {
-    if (!crystal.destinyAttributes.supportiveElements.includes(element)) {
-      destinyScore += 6;
-    }
-  });
-  details['命理分数'] = destinyScore;
-  totalScore += destinyScore;
+  // 检查水晶的支持元素是否完全匹配喜用神（主用神和次用神）
+  const crystalElements = crystal.destinyAttributes.supportiveElements;
+  const hasAllFavorableElements = favorableElements.every(element => 
+    crystalElements.includes(element)
+  );
 
-  // 2. 功能属性分数（基于主要功能、初印象和内在潜能的匹配度）
-  let functionalScore = 0;
-  if (crystal.functionalAttributes.primaryPurposes[primaryNeed]) {
-    functionalScore += 30; // 主要功能匹配
-  }
-  if (crystal.functionalAttributes.impressions?.[desiredImpression]) {
-    functionalScore += 10; // 初印象匹配
-  }
-  if (crystal.correctiveAttributes.potentials?.[desiredPotential]) {
-    functionalScore += 15; // 内在潜能匹配（增加权重）
-  }
-  details['功能分数'] = functionalScore;
-  totalScore += functionalScore;
-
-  // 3. 修正属性分数（基于修正属性和健康问题的匹配度）
-  let correctiveScore = 0;
-  if (crystal.correctiveAttributes.correctiveProperties[situation]) {
-    correctiveScore += 20; // 修正属性匹配（增加权重）
-  }
-  if (crystal.correctiveAttributes.healthIssues?.[healthIssue]) {
-    correctiveScore += 10; // 健康问题匹配（增加权重）
-  }
-  details['修正分数'] = correctiveScore;
-  totalScore += correctiveScore;
-
-  // 4. 协同效应分数（基于与已选水晶的互补性）
-  let synergyScore = 0;
-  selectedCrystals.forEach(selected => {
-    // 检查元素相性
-    const commonElements = crystal.destinyAttributes.supportiveElements
-      .filter(element => selected.destinyAttributes.supportiveElements.includes(element));
-    synergyScore += commonElements.length * 3; // 共同元素加分
-
-    // 检查功能互补性
-    if (crystal.functionalAttributes.primaryPurposes[primaryNeed] !== 
-        selected.functionalAttributes.primaryPurposes[primaryNeed]) {
-      synergyScore += 7; // 功能互补加分
-    }
-
-    // 检查修正属性互补性
-    if (crystal.correctiveAttributes.correctiveProperties[situation] !==
-        selected.correctiveAttributes.correctiveProperties[situation]) {
-      synergyScore += 5; // 修正属性互补加分
-    }
-  });
-  synergyScore = Math.min(synergyScore, 20); // 限制协同效应的影响
-  details['协同分数'] = synergyScore;
-  totalScore += synergyScore;
-
-  // 5. 惩罚项
-  // 5.1 忌用神冲突惩罚
-  for (const unfavorable of unfavorableElements) {
-    if (crystal.destinyAttributes.unsupportiveElements.includes(unfavorable)) {
-      // 基础冲突惩罚
-      totalScore -= 60;
-      details['忌用神冲突惩罚'] = -60;
-    }
+  if (!hasAllFavorableElements) {
+    console.log(`命运石 ${crystal.name} 不完全匹配喜用神，直接排除`);
+    return { score: -1000, details: { '命理分数': -1000 } }; // 不完全匹配则直接返回极低分
   }
 
-  return { score: totalScore, details };
-}
-
-// 命运石专用打分系统
-function scoreDestinyCrystal(
-  crystal: Crystal,
-  {
-    mainElement,
-    favorableElements,
-    unfavorableElements
-  }: {
-    mainElement: string;
-    favorableElements: string[];
-    unfavorableElements: string[];
-  }
-): { score: number; details: Record<string, number> } {
-  const details: Record<string, number> = {};
-  let totalScore = 0;
-
-  // 1. 主元素匹配度（保持低权重）
+  // 1. 主元素匹配度（在完全匹配喜用神的基础上）
   let mainElementScore = 0;
   if (crystal.destinyAttributes.supportiveElements.includes(mainElement)) {
     mainElementScore = 5;
@@ -132,115 +195,56 @@ function scoreDestinyCrystal(
   details['主元素分数'] = mainElementScore;
   totalScore += mainElementScore;
   
-  // 2. 喜用神匹配度（增加权重）
-  let favorableScore = 0;
-  let matchedFavorables = 0;
-  let favorableGenerationBonus = 0;
-  
-  favorableElements.forEach(element => {
-    if (crystal.destinyAttributes.supportiveElements.includes(element)) {
-      favorableScore += 40; // 提高单个喜用神的基础分
-      matchedFavorables++;
-      
-      // 检查与主元素的相生关系
-      if (isElementCompatible(element, mainElement)) {
-        favorableGenerationBonus += 15; // 增加相生关系奖励
-      }
-    }
-  });
-  
-  // 匹配喜用神数量的额外奖励
-  if (matchedFavorables > 1) {
-    favorableScore += matchedFavorables * 25; // 增加多匹配的奖励分数
-  }
-  
-  // 添加相生关系奖励
-  favorableScore += favorableGenerationBonus;
-  
+  // 2. 喜用神匹配度（已确保完全匹配）
+  const favorableScore = 100; // 给予固定的高分
   details['喜用神分数'] = favorableScore;
   totalScore += favorableScore;
 
-  // 3. 忌用神规避度（增加权重）
-  let unfavorableScore = 0;
-  let unfavorableAvoidanceBonus = 0;
-  
-  unfavorableElements.forEach(element => {
-    if (!crystal.destinyAttributes.supportiveElements.includes(element)) {
-      unfavorableScore += 20; // 提高基础规避分
-      
-      // 检查与主元素的相克关系
-      if (isElementRestraining(element, mainElement)) {
-        unfavorableAvoidanceBonus += 10; // 增加相克关系奖励
-      }
-    }
-  });
-  
-  // 完全规避忌用神的额外奖励
-  if (unfavorableElements.every(element => !crystal.destinyAttributes.supportiveElements.includes(element))) {
-    unfavorableScore += 20; // 增加完全规避的奖励
+  // 3. 协同效应分数（直接基于用户需求计算）
+  let synergyScore = 0;
+  // 检查功能属性
+  if (crystal.functionalAttributes.primaryPurposes[primaryNeed]) {
+    synergyScore += 10;  // 拥有对应功能属性加10分
+    console.log(`命运石 ${crystal.name} 匹配功能属性 ${primaryNeed}，加10分`);
   }
-  
-  // 添加相克关系奖励
-  unfavorableScore += unfavorableAvoidanceBonus;
-  
-  details['忌用神规避分数'] = unfavorableScore;
-  totalScore += unfavorableScore;
+  if (crystal.functionalAttributes.impressions?.[desiredImpression]) {
+    synergyScore += 5;   // 拥有对应印象属性加5分
+    console.log(`命运石 ${crystal.name} 匹配印象属性 ${desiredImpression}，加5分`);
+  }
+  // 检查修正属性
+  if (crystal.correctiveAttributes.correctiveProperties[situation]) {
+    synergyScore += 10;  // 拥有对应修正特性加10分
+    console.log(`命运石 ${crystal.name} 匹配修正特性 ${situation}，加10分`);
+  }
+  if (crystal.correctiveAttributes.healthIssues?.[healthIssue]) {
+    synergyScore += 5;   // 拥有对应健康问题修正加5分
+    console.log(`命运石 ${crystal.name} 匹配健康问题 ${healthIssue}，加5分`);
+  }
+  // 检查潜能属性
+  if (crystal.correctiveAttributes.potentials?.[desiredPotential]) {
+    synergyScore += 5;  // 拥有对应潜能属性加5分
+    console.log(`命运石 ${crystal.name} 匹配潜能属性 ${desiredPotential}，加5分`);
+  }
+  synergyScore = Math.min(synergyScore, 20);  // 保持最高20分的限制
+  details['协同分数'] = synergyScore;
+  totalScore += synergyScore;
 
-  // 4. 惩罚项（增加区分度）
-  let penaltyScore = 0;
-  // 检查与忌用神的直接冲突
-  unfavorableElements.forEach(element => {
-    if (crystal.destinyAttributes.unsupportiveElements.includes(element)) {
-      penaltyScore -= 60;
-      
-      // 如果存在相克关系，增加惩罚
-      if (isElementRestraining(element, mainElement)) {
-        penaltyScore -= 25; // 增加相克关系惩罚
-      }
-    }
+  console.log(`命运石 ${crystal.name} 最终得分：`, {
+    主元素分数: mainElementScore,
+    喜用神分数: favorableScore,
+    协同分数: synergyScore,
+    总分: totalScore
   });
-  
-  details['惩罚分数'] = penaltyScore;
-  totalScore += penaltyScore;
 
   return { score: totalScore, details };
 }
 
-// 辅助函数：判断两个五行元素是否相生
-function isElementCompatible(element1: string, element2: string): boolean {
-  const generationCycles: Record<string, string> = {
-    '木': '火',
-    '火': '土',
-    '土': '金',
-    '金': '水',
-    '水': '木'
-  };
-  return generationCycles[element1] === element2;
-}
-
-// 辅助函数：判断element1是否克制element2
-function isElementRestraining(element1: string, element2: string): boolean {
-  const restrainingCycles: Record<string, string> = {
-    '木': '土',
-    '土': '水',
-    '水': '火',
-    '火': '金',
-    '金': '木'
-  };
-  return restrainingCycles[element1] === element2;
-}
-
-// 辅助函数：判断element1是否被element2克制
-function isElementRestrained(element1: string, element2: string): boolean {
-  return isElementRestraining(element2, element1);
-}
-
-// 辅助函数：获取基于水晶特性的平衡度修正值
-function getUniqueBalanceModifier(crystal: Crystal): number {
-  // 基于水晶的supportiveElements数量生成微小的修正值
-  const elementsCount = crystal.destinyAttributes.supportiveElements.length;
-  const modifier = (elementsCount * 0.1) + (crystal.id.length * 0.01);
-  return modifier;
+// 辅助函数：生成基于日期时间的种子值
+function generateSeedFromDateTime(dateTimeStr: string): number {
+  const date = new Date(dateTimeStr);
+  const timestamp = date.getTime();
+  const seed = timestamp % 1000000; // 使用时间戳的后6位作为种子
+  return Math.abs(seed);
 }
 
 // 更新选择命运石的逻辑
@@ -248,13 +252,25 @@ export function selectDestinyCrystal(
   mainElement: string,
   favorableElements: string[],
   unfavorableElements: string[],
-  birthDateTime: string
+  birthDateTime: string,
+  primaryNeed: PrimaryNeed,
+  situation: CommonSituation,
+  desiredImpression: Impression,
+  desiredPotential: Potential,
+  healthIssue: HealthIssue,
+  selectedCrystals: Crystal[] = []
 ): Crystal {
   const scoredCrystals = crystalData.map(crystal => {
     const { score, details } = scoreDestinyCrystal(crystal, {
       mainElement,
       favorableElements,
-      unfavorableElements
+      unfavorableElements,
+      primaryNeed,
+      situation,
+      desiredImpression,
+      desiredPotential,
+      healthIssue,
+      selectedCrystals
     });
     
     console.log(`命运石评分 - ${crystal.name}:`, details);
@@ -280,22 +296,6 @@ export function selectDestinyCrystal(
   return selected.crystal;
 }
 
-// 辅助函数：从出生日期时间生成确定性的随机种子
-function generateSeedFromDateTime(dateTime: string): number {
-  // 移除所有非数字字符，只保留数字
-  const numericValue = dateTime.replace(/\D/g, '');
-  
-  // 使用简单的哈希算法生成种子
-  let seed = 0;
-  for (let i = 0; i < numericValue.length; i++) {
-    seed = ((seed << 5) - seed) + parseInt(numericValue[i]);
-    seed = seed & seed; // 转换为32位整数
-  }
-  
-  // 确保种子为正数
-  return Math.abs(seed);
-}
-
 // 辅助函数：将分数相近的水晶分组
 function groupSimilarScores(scoredCrystals: Array<{crystal: Crystal; score: number; details: Record<string, number>}>): Array<Array<{crystal: Crystal; score: number; details: Record<string, number>}>> {
   // 按分数降序排序
@@ -304,21 +304,21 @@ function groupSimilarScores(scoredCrystals: Array<{crystal: Crystal; score: numb
   const groups: Array<Array<{crystal: Crystal; score: number; details: Record<string, number>}>> = [];
   let currentGroup: Array<{crystal: Crystal; score: number; details: Record<string, number>}> = [];
   
-  sortedCrystals.forEach((crystal, index) => {
+  sortedCrystals.forEach((item, index) => {
     if (index === 0) {
-      currentGroup.push(crystal);
+      currentGroup.push(item);
     } else {
       const prevScore = sortedCrystals[index - 1].score;
-      const scoreDiff = prevScore - crystal.score;
+      const scoreDiff = prevScore - item.score;
       
       // 如果分数差异大于2，开始新的分组
       if (scoreDiff > 2) {
         if (currentGroup.length > 0) {
           groups.push([...currentGroup]);
         }
-        currentGroup = [crystal];
+        currentGroup = [item];
       } else {
-        currentGroup.push(crystal);
+        currentGroup.push(item);
       }
     }
   });
@@ -328,141 +328,6 @@ function groupSimilarScores(scoredCrystals: Array<{crystal: Crystal; score: numb
   }
   
   return groups;
-}
-
-// 更新选择功能石的逻辑
-export function selectFunctionalCrystal(
-  primaryNeed: PrimaryNeed,
-  desiredImpression: Impression,
-  desiredPotential: Potential, // 新增内在潜能参数
-  excludedCrystals: Crystal[] = []
-): Crystal {
-  const scoredCrystals = crystalData
-    .filter(crystal => !excludedCrystals.some(excluded => excluded.id === crystal.id))
-    .map(crystal => {
-      const { score, details } = scoreCrystal(crystal, {
-        mainElement: "", // 不考虑命理
-        favorableElements: [],
-        unfavorableElements: [],
-        primaryNeed,
-        situation: CommonSituation.INDECISIVE, // 默认值
-        desiredImpression,
-        desiredPotential, // 在功能石选择时考虑内在潜能
-        healthIssue: HealthIssue.STRESS, // 默认值
-        selectedCrystals: excludedCrystals
-      });
-      
-      console.log(`评分详情 - ${crystal.name}:`, details);
-      return { crystal, score, details };
-    });
-
-  scoredCrystals.sort((a, b) => b.score - a.score);
-  console.log("功能石候选排名:", scoredCrystals.map(c => `${c.crystal.name}(${c.score})`).join(', '));
-
-  if (scoredCrystals.length === 0) {
-    throw new Error("找不到合适的功能石");
-  }
-
-  return scoredCrystals[0].crystal;
-}
-
-// 更新选择修正石的逻辑
-export function selectCorrectiveCrystal(
-  situation: CommonSituation,
-  healthIssue: HealthIssue,
-  excludedCrystals: Crystal[] = []
-): Crystal {
-  // 定义允许作为修正石的水晶ID列表
-  const allowedCorrectiveCrystalIds = [
-    'zishuijing',    // 紫水晶
-    'fenjing',       // 粉晶
-    'clear_quartz',  // 白水晶
-    'citrine',       // 黄水晶
-    'smoky_quartz',  // 茶晶
-    'strawberry_quartz', // 草莓晶
-    'yuelongshi',    // 月光石
-    'dongling_jade', // 东陵玉
-    'amazonite',     // 天河石
-    'red_rutilated_quartz' // 红纹石
-  ];
-
-  // 首先过滤出允许的修正石
-  const allowedCrystals = crystalData.filter(crystal => 
-    allowedCorrectiveCrystalIds.includes(crystal.id)
-  );
-
-  console.log("允许作为修正石的水晶:", allowedCrystals.map(c => c.name).join(', '));
-
-  if (allowedCrystals.length === 0) {
-    throw new Error("没有找到允许的修正石");
-  }
-
-  // 从允许的修正石中过滤掉已选择的水晶
-  const availableCrystals = allowedCrystals.filter(crystal => 
-    !excludedCrystals.some(excluded => excluded.id === crystal.id)
-  );
-
-  console.log("可用的修正石:", availableCrystals.map(c => c.name).join(', '));
-
-  if (availableCrystals.length === 0) {
-    throw new Error("没有可用的修正石（所有修正石都被排除或不在允许列表中）");
-  }
-
-  // 只对允许的修正石进行评分
-  const scoredCrystals = availableCrystals.map(crystal => {
-    // 确保水晶在允许列表中
-    if (!allowedCorrectiveCrystalIds.includes(crystal.id)) {
-      console.log(`跳过非修正石: ${crystal.name}`);
-      return null;
-    }
-
-    const { score, details } = scoreCrystal(crystal, {
-      mainElement: "", // 不考虑命理
-      favorableElements: [],
-      unfavorableElements: [],
-      primaryNeed: PrimaryNeed.BALANCE, // 默认值
-      situation,
-      desiredImpression: Impression.WARM, // 默认值
-      desiredPotential: Potential.EMPATHY, // 默认值，不再考虑内在潜能
-      healthIssue,
-      selectedCrystals: excludedCrystals
-    });
-    
-    console.log(`修正石评分详情 - ${crystal.name}:`, details);
-    return { crystal, score, details };
-  }).filter((item): item is { crystal: Crystal; score: number; details: Record<string, number> } => item !== null);
-
-  scoredCrystals.sort((a, b) => b.score - a.score);
-  console.log("修正石候选排名:", scoredCrystals.map(c => `${c.crystal.name}(${c.score})`).join(', '));
-
-  if (scoredCrystals.length === 0) {
-    throw new Error("找不到合适的修正石");
-  }
-
-  const selectedCrystal = scoredCrystals[0].crystal;
-  console.log("最终选择的修正石:", selectedCrystal.name);
-
-  // 最后再次检查确保选中的水晶确实在允许列表中
-  if (!allowedCorrectiveCrystalIds.includes(selectedCrystal.id)) {
-    throw new Error(`选中的水晶 ${selectedCrystal.name} 不在允许的修正石列表中`);
-  }
-
-  return selectedCrystal;
-}
-
-// 检查选中的水晶组合是否兼容
-export function checkCrystalCompatibility(crystals: Crystal[]): boolean {
-  for (let i = 0; i < crystals.length; i++) {
-    for (let j = i + 1; j < crystals.length; j++) {
-      if (
-        crystals[i].incompatibleWith.includes(crystals[j].id) ||
-        crystals[j].incompatibleWith.includes(crystals[i].id)
-      ) {
-        return false;
-      }
-    }
-  }
-  return true;
 }
 
 // 更新主选石函数
@@ -487,11 +352,18 @@ export function selectCrystals(
   
   while (attempts < maxAttempts) {
     try {
+      // 先选择命运石
       const destinyCrystal = selectDestinyCrystal(
         mainElement,
         favorableElements,
         unfavorableElements,
-        birthDateTime
+        birthDateTime,
+        primaryNeed,
+        situation,
+        desiredImpression,
+        desiredPotential,
+        healthIssue,
+        []  // 初始选择时没有已选水晶
       );
 
       if (excludedTypes.includes(destinyCrystal.id)) {
@@ -499,32 +371,93 @@ export function selectCrystals(
         continue;
       }
 
-      // 在功能石选择时传入内在潜能参数
-      const functionalCrystal = selectFunctionalCrystal(
-        primaryNeed,
-        desiredImpression,
-        desiredPotential,
-        [destinyCrystal]
-      );
+      // 选择功能石
+      const functionalScoredCrystals = crystalData
+        .filter(crystal => !excludedTypes.includes(crystal.id) && crystal.id !== destinyCrystal.id)
+        .map(crystal => {
+          const { score, details } = scoreCrystal(crystal, {
+            favorableElements,
+            unfavorableElements,
+            primaryNeed,
+            situation,
+            desiredImpression,
+            desiredPotential,
+            healthIssue,
+            selectedCrystals: [destinyCrystal],
+            isCorrective: false
+          });
+          
+          console.log(`功能石评分详情 - ${crystal.name}:`, details);
+          return { crystal, score, details };
+        });
 
-      if (excludedTypes.includes(functionalCrystal.id)) {
+      functionalScoredCrystals.sort((a, b) => b.score - a.score);
+      console.log("功能石候选排名:", functionalScoredCrystals.map(c => `${c.crystal.name}(${c.score})`).join(', '));
+
+      if (functionalScoredCrystals.length === 0) {
         attempts++;
         continue;
       }
 
-      // 修正石选择不再考虑内在潜能
-      const correctiveCrystal = selectCorrectiveCrystal(
-        situation,
-        healthIssue,
-        [destinyCrystal, functionalCrystal]
-      );
+      const functionalCrystal = functionalScoredCrystals[0].crystal;
 
-      if (excludedTypes.includes(correctiveCrystal.id)) {
+      // 选择修正石
+      const allowedCorrectiveCrystalIds = [
+        "zishuijing",    // 紫水晶
+        "fenjing",       // 粉晶
+        "citrine",       // 黄水晶
+        "lapis_lazuli",  // 青金石
+        "red_rutilated_quartz", // 红纹石
+        "dongling_jade", // 东陵玉
+        "kyanite",       // 蓝晶石
+        "golden_rutilated_quartz", // 金发晶
+        "kunzite"        // 紫锂辉
+      ];
+
+      const correctiveScoredCrystals = crystalData
+        .filter(crystal => 
+          !excludedTypes.includes(crystal.id) && 
+          crystal.id !== destinyCrystal.id && 
+          crystal.id !== functionalCrystal.id &&
+          allowedCorrectiveCrystalIds.includes(crystal.id)
+        )
+        .map(crystal => {
+          const { score, details } = scoreCrystal(crystal, {
+            favorableElements,
+            unfavorableElements,
+            primaryNeed,
+            situation,
+            desiredImpression,
+            desiredPotential,
+            healthIssue,
+            selectedCrystals: [destinyCrystal, functionalCrystal],
+            isCorrective: true
+          });
+          
+          console.log(`修正石评分详情 - ${crystal.name}:`, details);
+          return { crystal, score, details };
+        });
+
+      correctiveScoredCrystals.sort((a, b) => b.score - a.score);
+      console.log("修正石候选排名:", correctiveScoredCrystals.map(c => `${c.crystal.name}(${c.score})`).join(', '));
+
+      if (correctiveScoredCrystals.length === 0) {
         attempts++;
         continue;
       }
 
-      if (checkCrystalCompatibility([destinyCrystal, functionalCrystal, correctiveCrystal])) {
+      const correctiveCrystal = correctiveScoredCrystals[0].crystal;
+
+      // 检查水晶组合是否兼容
+      const isCompatible = [destinyCrystal, functionalCrystal, correctiveCrystal].every((crystal, i, crystals) => {
+        return crystals.every((otherCrystal, j) => {
+          if (i === j) return true;
+          return !crystal.incompatibleWith.includes(otherCrystal.id) && 
+                 !otherCrystal.incompatibleWith.includes(crystal.id);
+        });
+      });
+
+      if (isCompatible) {
         return {
           destinyCrystal,
           functionalCrystal,

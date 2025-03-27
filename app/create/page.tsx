@@ -14,7 +14,7 @@ import ComplexMagicAnimation from "@/components/ComplexMagicAnimation"
 import { beadConfigurations, type BeadConfig } from "@/config/beadConfigurations"
 import dynamic from "next/dynamic"
 import type { Bead } from "@/components/BraceletViewer3D"
-import { calculateBaZi } from "@/lib/bazi"
+import { BRANCH_HIDDEN_STEMS, calculateBaZi, type BaZiResult } from "@/lib/bazi"
 import { Solar } from "lunar-typescript"
 import { crystalData, Crystal } from "@/lib/crystalData"
 import { validateCrystalData } from '@/lib/validateCrystalData'
@@ -28,7 +28,11 @@ import ReactDOM from 'react-dom'
 
 const BraceletViewer3D = dynamic(() => import("@/components/BraceletViewer3D"), {
   ssr: false,
-  loading: () => <div className="w-full h-[400px] bg-gray-100 animate-pulse rounded-lg" />
+  loading: () => (
+    <div className="w-full aspect-square bg-[#f8f5f0] rounded-lg overflow-hidden flex items-center justify-center">
+      <div className="w-full h-full bg-gray-100 animate-pulse rounded-lg" />
+    </div>
+  )
 })
 
 type BeadInfo = {
@@ -393,7 +397,7 @@ export default function CreatePage() {
   };
 
   const generateBracelet = async (formData: FormData): Promise<Bracelet> => {
-    const baZiResult = calculateBaZi(formData.birthTime);
+    const baZi: BaZiResult = calculateBaZi(formData.birthTime);
     
     // 将用户需求映射到 PrimaryNeed 枚举
     const primaryNeedMap: Record<string, PrimaryNeed> = {
@@ -401,7 +405,12 @@ export default function CreatePage() {
       '财富增长': PrimaryNeed.WEALTH,
       '能量防护': PrimaryNeed.PROTECTION,
       '身心平衡': PrimaryNeed.BALANCE,
-      '事业上升': PrimaryNeed.CAREER
+      '事业上升': PrimaryNeed.CAREER,
+      'career': PrimaryNeed.CAREER,
+      'relationship': PrimaryNeed.RELATIONSHIP,
+      'wealth': PrimaryNeed.WEALTH,
+      'protection': PrimaryNeed.PROTECTION,
+      'balance': PrimaryNeed.BALANCE
     };
     
     // 将修正需求映射到 CommonSituation 枚举
@@ -409,7 +418,11 @@ export default function CreatePage() {
       '改善决策犹豫': CommonSituation.INDECISIVE,
       '提升恢复能力': CommonSituation.FATIGUE,
       '减少人际消耗': CommonSituation.SOCIAL_DRAIN,
-      '平衡能量敏感': CommonSituation.ENERGY_SENSITIVE
+      '平衡能量敏感': CommonSituation.ENERGY_SENSITIVE,
+      'indecisive': CommonSituation.INDECISIVE,
+      'fatigue': CommonSituation.FATIGUE,
+      'socialDrain': CommonSituation.SOCIAL_DRAIN,
+      'energySensitive': CommonSituation.ENERGY_SENSITIVE
     };
     
     // 将初印象映射到 Impression 枚举
@@ -417,7 +430,11 @@ export default function CreatePage() {
       'A如沐春风般的温暖亲和力': Impression.WARM,
       'B沉稳可靠的专业权威感': Impression.RELIABLE,
       'C锋芒毕露的个人魅力值': Impression.CHARMING,
-      'D洞若观火的冷静洞察力': Impression.INSIGHTFUL
+      'D洞若观火的冷静洞察力': Impression.INSIGHTFUL,
+      'warm': Impression.WARM,
+      'reliable': Impression.RELIABLE,
+      'charming': Impression.CHARMING,
+      'insightful': Impression.INSIGHTFUL
     };
     
     // 将内在潜能映射到 Potential 枚举
@@ -426,11 +443,23 @@ export default function CreatePage() {
       'B理性决策力': Potential.DECISION,
       'C卓越表达力': Potential.EXPRESSION,
       'D直觉敏锐度': Potential.INTUITION,
-      'E高效行动力': Potential.EFFICIENCY
+      'E高效行动力': Potential.EFFICIENCY,
+      'empathy': Potential.EMPATHY,
+      'decision': Potential.DECISION,
+      'expression': Potential.EXPRESSION,
+      'intuition': Potential.INTUITION,
+      'efficiency': Potential.EFFICIENCY
     };
     
     // 将健康问题映射到 HealthIssue 枚举
     const healthIssueMap: Record<string, HealthIssue> = {
+      'A. 长期压力 / 焦虑': HealthIssue.STRESS,
+      'B. 睡眠质量不佳': HealthIssue.SLEEP,
+      'C. 免疫力低下': HealthIssue.IMMUNITY,
+      'D. 血液循环不畅': HealthIssue.CIRCULATION,
+      'E. 呼吸系统不适': HealthIssue.RESPIRATORY,
+      'F. 情绪低落 / 缺乏活力': HealthIssue.MOOD,
+      'G. 内分泌失调': HealthIssue.HORMONAL,
       'stress': HealthIssue.STRESS,
       'sleep': HealthIssue.SLEEP,
       'immunity': HealthIssue.IMMUNITY,
@@ -439,17 +468,36 @@ export default function CreatePage() {
       'mood': HealthIssue.MOOD,
       'hormonal': HealthIssue.HORMONAL
     };
-    
+
+    // 获取映射后的枚举值
+    const primaryNeed = primaryNeedMap[formData.primaryNeed];
+    const situation = commonSituationMap[formData.correctiveSituation];
+    const desiredImpression = impressionMap[formData.impression];
+    const desiredPotential = potentialMap[formData.potential];
+    const healthIssue = healthIssueMap[formData.healthIssue];
+
+    console.log('原始表单数据：', formData);
+    console.log('映射后的参数：', {
+      primaryNeed,
+      situation,
+      desiredImpression,
+      desiredPotential,
+      healthIssue
+    });
+
     // 使用 selectCrystals 函数选择水晶
     const selectedCrystals = selectCrystals(
-      baZiResult.dayMaster,
-      baZiResult.favorable,
-      baZiResult.unfavorable,
-      primaryNeedMap[formData.primaryNeed] || PrimaryNeed.BALANCE,
-      commonSituationMap[formData.correctiveSituation] || CommonSituation.FATIGUE,
-      impressionMap[formData.impression] || Impression.WARM,
-      potentialMap[formData.potential] || Potential.EMPATHY,
-      healthIssueMap[formData.healthIssue] || HealthIssue.STRESS,
+      baZi.dayMaster,
+      [
+        ...(baZi.recommendedElements?.match(/主用神：([^，]+)/)?.[1]?.split("、") || []),
+        ...(baZi.recommendedElements?.match(/次用神：([^）]+)/)?.[1]?.split("、") || [])
+      ],
+      [], // 不再使用忌用神
+      primaryNeed,
+      situation,
+      desiredImpression,
+      desiredPotential,
+      healthIssue,
       formData.birthTime,
       []
     );
@@ -551,131 +599,6 @@ export default function CreatePage() {
       console.error('Error generating bracelet:', error);
       throw error;
     }
-  };
-
-  // 实现精简版的最优石头选择策略
-  const selectOptimalCrystal = (
-    candidates: Crystal[], 
-    userNeeds: string[],
-    selectedCrystals: Crystal[] = []
-  ): Crystal | null => {
-    if (candidates.length === 0) return null;
-    if (candidates.length === 1) return candidates[0];
-    
-    // 为每个候选石头计算一个综合分数
-    const scoredCandidates = candidates.map(crystal => {
-      let score = 0;
-      
-      // 1. 基于匹配度：计算与用户需求的匹配程度
-      userNeeds.forEach(need => {
-        // 检查石头的描述是否包含用户需求关键词
-        if (crystal.description && crystal.description.includes(need)) {
-          score += 25; // 描述中包含关键词加25分（提高权重）
-        }
-        
-        // 检查功能属性是否匹配用户需求
-        if (crystal.functionalAttributes && crystal.functionalAttributes.primaryPurposes) {
-          const purposes = crystal.functionalAttributes.primaryPurposes;
-          if ((need.includes("关系") || need.includes("爱情")) && purposes.relationship) {
-            score += 40; // 匹配关系/爱情需求加40分（提高权重）
-          }
-          if ((need.includes("财富") || need.includes("金钱")) && purposes.wealth) {
-            score += 40; // 匹配财富需求加40分（提高权重）
-          }
-          if ((need.includes("保护") || need.includes("安全")) && purposes.protection) {
-            score += 40; // 匹配保护需求加40分（提高权重）
-          }
-          if ((need.includes("平衡") || need.includes("和谐")) && purposes.balance) {
-            score += 40; // 匹配平衡需求加40分（提高权重）
-          }
-          if ((need.includes("事业") || need.includes("工作")) && purposes.career) {
-            score += 40; // 匹配事业需求加40分（提高权重）
-          }
-          
-          // 计算匹配的功能属性数量，多重匹配获得额外加分
-          const matchCount = Object.entries(purposes)
-            .filter(([_, v]) => v === true).length;
-          if (matchCount > 1) {
-            score += (matchCount - 1) * 5; // 每多匹配一个属性额外加5分
-          }
-        }
-        
-        // 检查修正属性是否匹配用户需求
-        if (crystal.correctiveAttributes && crystal.correctiveAttributes.correctiveProperties) {
-          const properties = crystal.correctiveAttributes.correctiveProperties;
-          if ((need.includes("犹豫") || need.includes("决策")) && properties.indecisive) {
-            score += 40; // 匹配决策问题加40分（提高权重）
-          }
-          if ((need.includes("疲劳") || need.includes("精力")) && properties.fatigue) {
-            score += 40; // 匹配疲劳问题加40分（提高权重）
-          }
-          if ((need.includes("社交") || need.includes("人际")) && properties.socialDrain) {
-            score += 40; // 匹配社交问题加40分（提高权重）
-          }
-          if ((need.includes("敏感") || need.includes("能量")) && properties.energySensitive) {
-            score += 40; // 匹配能量敏感问题加40分（提高权重）
-          }
-          
-          // 计算匹配的修正属性数量，多重匹配获得额外加分
-          const matchCount = Object.entries(properties)
-            .filter(([_, v]) => v === true).length;
-          if (matchCount > 1) {
-            score += (matchCount - 1) * 5; // 每多匹配一个属性额外加5分
-          }
-        }
-      });
-      
-      // 3. 基于与已选石头的协同效应
-      selectedCrystals.forEach(selectedCrystal => {
-        // 检查是否有冲突
-        if (hasConflict(crystal, selectedCrystal)) {
-          score -= 50; // 有冲突减50分（提高权重）
-        } else {
-          // 如果没有冲突，则认为有协同效应
-          score += 25; // 没有冲突加25分（提高权重）
-          
-          // 检查元素相似性，增加协同效应
-          if (crystal.destinyAttributes && selectedCrystal.destinyAttributes) {
-            const commonSupportiveElements = crystal.destinyAttributes.supportiveElements.filter(
-              element => selectedCrystal.destinyAttributes.supportiveElements.includes(element)
-            );
-            score += commonSupportiveElements.length * 5; // 每个共同支持元素加5分
-          }
-        }
-      });
-      
-      // 4. 考虑石头的全面性
-      let attributeCount = 0;
-      if (crystal.functionalAttributes?.primaryPurposes) {
-        attributeCount += Object.values(crystal.functionalAttributes.primaryPurposes).filter(v => v).length;
-      }
-      if (crystal.correctiveAttributes?.correctiveProperties) {
-        attributeCount += Object.values(crystal.correctiveAttributes.correctiveProperties).filter(v => v).length;
-      }
-      score += attributeCount * 3; // 每个属性加3分，鼓励选择更全面的石头
-      
-      return { crystal, score };
-    });
-    
-    // 按分数降序排序
-    scoredCandidates.sort((a, b) => b.score - a.score);
-    
-    // 返回得分最高的石头
-    return scoredCandidates[0].crystal;
-  };
-
-  // 辅助函数：检查两个石头是否有冲突
-  const hasConflict = (crystal1: Crystal, crystal2: Crystal): boolean => {
-    // 检查是否在不兼容列表中
-    if (crystal1.incompatibleWith && crystal1.incompatibleWith.includes(crystal2.name)) {
-      return true;
-    }
-    
-    if (crystal2.incompatibleWith && crystal2.incompatibleWith.includes(crystal1.name)) {
-      return true;
-    }
-    
-    return false;
   };
 
   return (
@@ -938,22 +861,195 @@ export default function CreatePage() {
                       基于您的个人信息和现状，我们为您准备了完美的灵石组合并创建了专属手链，他们与此时此刻的你最为契合。
                     </p>
 
+                    <div className="mb-8">
+                      <div className="text-xl font-medium mb-4">你的八字分析</div>
+                      {formData.birthTime ? (
+                        (() => {
+                          const baZiResult: BaZiResult = calculateBaZi(formData.birthTime);
+                          const solar = Solar.fromDate(new Date(formData.birthTime));
+                          const lunar = solar.getLunar();
+                          const lunarDateStr = `${lunar.getYearInChinese()}年${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
+                          return (
+                            <div className="bg-white rounded-lg p-6 shadow-sm max-w-4xl mx-auto">
+                              <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 w-24">公历日期：</span>
+                                  <span className="text-gray-900 font-medium">{new Date(formData.birthTime).toLocaleDateString('zh-CN')}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <span className="text-gray-600 w-24">农历日期：</span>
+                                  <span className="text-gray-900 font-medium">{lunarDateStr}</span>
+                                </div>
+                              </div>
+
+                              <div className="mb-4">
+                                <h4 className="text-base font-medium text-gray-800 mb-2">四柱信息</h4>
+                                <div className="grid grid-cols-4 gap-2">
+                                  <div className="bg-gray-50 p-2 rounded">
+                                    <div className="text-gray-600 mb-1">年柱</div>
+                                    <div className="grid grid-cols-1 gap-1">
+                                      <div>
+                                        <div className="text-sm text-gray-500">天干</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.yearPillar.stem}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">地支</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.yearPillar.branch}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">藏干</div>
+                                        <div className="text-sm text-gray-900">{BRANCH_HIDDEN_STEMS[baZiResult.yearPillar.branch as keyof typeof BRANCH_HIDDEN_STEMS].join('、')}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="bg-gray-50 p-2 rounded">
+                                    <div className="text-gray-600 mb-1">月柱</div>
+                                    <div className="grid grid-cols-1 gap-1">
+                                      <div>
+                                        <div className="text-sm text-gray-500">天干</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.monthPillar.stem}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">地支</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.monthPillar.branch}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">藏干</div>
+                                        <div className="text-sm text-gray-900">{BRANCH_HIDDEN_STEMS[baZiResult.monthPillar.branch as keyof typeof BRANCH_HIDDEN_STEMS].join('、')}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="bg-gray-50 p-2 rounded">
+                                    <div className="text-gray-600 mb-1">日柱</div>
+                                    <div className="grid grid-cols-1 gap-1">
+                                      <div>
+                                        <div className="text-sm text-gray-500">天干</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.dayPillar.stem}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">地支</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.dayPillar.branch}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">藏干</div>
+                                        <div className="text-sm text-gray-900">{BRANCH_HIDDEN_STEMS[baZiResult.dayPillar.branch as keyof typeof BRANCH_HIDDEN_STEMS].join('、')}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="bg-gray-50 p-2 rounded">
+                                    <div className="text-gray-600 mb-1">时柱</div>
+                                    <div className="grid grid-cols-1 gap-1">
+                                      <div>
+                                        <div className="text-sm text-gray-500">天干</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.hourPillar.stem}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">地支</div>
+                                        <div className="text-lg font-medium text-gray-900">{baZiResult.hourPillar.branch}</div>
+                                      </div>
+                                      <div>
+                                        <div className="text-sm text-gray-500">藏干</div>
+                                        <div className="text-sm text-gray-900">{BRANCH_HIDDEN_STEMS[baZiResult.hourPillar.branch as keyof typeof BRANCH_HIDDEN_STEMS].join('、')}</div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mb-4">
+                                <h4 className="text-base font-medium text-gray-800 mb-2">格局分析</h4>
+                                <div className="bg-blue-50 p-3 rounded">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex items-center">
+                                      <span className="text-gray-600 w-24">日主：</span>
+                                      <span className="text-gray-900 font-medium">{baZiResult.dayMaster}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-600 w-24">身强度：</span>
+                                      <span className="text-gray-900 font-medium">{baZiResult.strengthScore}分</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-600 w-24">格局：</span>
+                                      <span className="text-gray-900 font-medium">
+                                        {baZiResult.specialPattern ? baZiResult.specialPattern.split('，')[0] : 
+                                         baZiResult.strengthScore > 60 ? "身强" :
+                                         baZiResult.strengthScore < 40 ? "身弱" : "平衡"}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-600 w-24">得势情况：</span>
+                                      <span className="text-gray-900 font-medium">{baZiResult.strengthStatus.join('、')}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mb-4">
+                                <h4 className="text-base font-medium text-gray-800 mb-2">用神分析</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="flex items-center">
+                                    <span className="text-gray-600 w-24">特殊格局：</span>
+                                    <span className="text-gray-900 font-medium">{baZiResult.specialPattern?.match(/喜(.+)$/)?.[1] || '无'}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="text-gray-600 w-24">扶抑用神：</span>
+                                    <span className="text-gray-900 font-medium">{baZiResult.specialPattern ? '无' : (baZiResult.strengthLevel?.match(/喜(.+)$/)?.[1] || '无特殊扶抑用神需求')}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="text-gray-600 w-24">调侯用神：</span>
+                                    <span className="text-gray-900 font-medium">{baZiResult.seasonalAdjustment || '无需调侯'}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="text-gray-600 w-24">通关用神：</span>
+                                    <span className="text-gray-900 font-medium">{baZiResult.conflictingElements || '无'}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div>
+                                <h4 className="text-base font-medium text-gray-800 mb-2">主见·璇玑建议</h4>
+                                <div className="bg-blue-50 p-3 rounded">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex items-center">
+                                      <span className="text-gray-600 w-24">主用神：</span>
+                                      <span className="text-gray-900 font-medium">{baZiResult.recommendedElements?.match(/主用神：([^，]+)/)?.[1] || '无'}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <span className="text-gray-600 w-24">次用神：</span>
+                                      <span className="text-gray-900 font-medium">{baZiResult.recommendedElements?.match(/次用神：([^）]+)/)?.[1] || '无'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()
+                      ) : null}
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div>
+                        <div className="text-xl font-medium mb-4">手链预览</div>
                         <div className="relative bracelet-preview">
-                          <BraceletViewer3D
-                            size={braceletSize}
-                            destinyStones={[bracelet.crystals[0]]}
-                            functionalStones={[bracelet.crystals[1]]}
-                            correctiveStones={[bracelet.crystals[2]]}
-                            layout={braceletLayouts[braceletSize]}
-                            onLayoutGenerated={(layout) => {
-                              setBraceletLayouts(prev => ({
-                                ...prev,
-                                [braceletSize]: layout
-                              }));
-                            }}
-                          />
+                          <Suspense fallback={
+                            <div className="w-full aspect-square bg-[#f8f5f0] rounded-lg overflow-hidden flex items-center justify-center">
+                              <div className="w-full h-full bg-gray-100 animate-pulse rounded-lg" />
+                            </div>
+                          }>
+                            <BraceletViewer3D
+                              size={braceletSize}
+                              destinyStones={[bracelet.crystals[0]]}
+                              functionalStones={[bracelet.crystals[1]]}
+                              correctiveStones={[bracelet.crystals[2]]}
+                              layout={braceletLayouts[braceletSize]}
+                              onLayoutGenerated={(layout) => {
+                                setBraceletLayouts(prev => ({
+                                  ...prev,
+                                  [braceletSize]: layout
+                                }));
+                              }}
+                            />
+                          </Suspense>
                         </div>
 
                         <div className="mt-8 space-y-4 bg-[#f8f5f0] p-6 rounded-lg">
@@ -996,69 +1092,6 @@ export default function CreatePage() {
                                 <div>(6mm+)</div>
                               </button>
                             </div>
-                          </div>
-
-                          <div className="mb-6">
-                            <div className="text-xl font-medium mb-4">你的八字分析</div>
-                            {formData.birthTime && (
-                              <div className="space-y-4">
-                                {(() => {
-                                  const baZi = calculateBaZi(formData.birthTime);
-                                  const solar = Solar.fromDate(new Date(formData.birthTime));
-                                  const lunar = solar.getLunar();
-                                  console.log('Debug - Solar date:', `${solar.getYear()}-${solar.getMonth()}-${solar.getDay()}`);
-                                  console.log('Debug - Lunar date:', `${lunar.getYear()}-${lunar.getMonth()}-${lunar.getDay()}`);
-                                  console.log('Debug - Month stem:', baZi.monthPillar.stem);
-                                  console.log('Debug - Month branch:', baZi.monthPillar.branch);
-                                  return (
-                                    <>
-                                      <div className="text-[#666666] mb-4">
-                                        <p>公历：{new Date(formData.birthTime).toLocaleString('zh-CN', { 
-                                          year: 'numeric',
-                                          month: '2-digit',
-                                          day: '2-digit',
-                                          hour: '2-digit',
-                                          minute: '2-digit'
-                                        })}</p>
-                                        <p>农历：{lunar.getYearInChinese()}年{lunar.getMonthInChinese()}月{lunar.getDayInChinese()}</p>
-                                      </div>
-                                      <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mb-4">
-                                        <div className="text-center">
-                                          <div className="text-sm text-gray-500 mb-1">年柱</div>
-                                          <div className="font-medium">{baZi.yearPillar.stem}{baZi.yearPillar.branch}</div>
-                                        </div>
-                                        <div className="text-center">
-                                          <div className="text-sm text-gray-500 mb-1">月柱</div>
-                                          <div className="font-medium">{baZi.monthPillar.stem}{baZi.monthPillar.branch}</div>
-                                        </div>
-                                        <div className="text-center">
-                                          <div className="text-sm text-gray-500 mb-1">日柱</div>
-                                          <div className="font-medium">{baZi.dayPillar.stem}{baZi.dayPillar.branch}</div>
-                                        </div>
-                                        <div className="text-center">
-                                          <div className="text-sm text-gray-500 mb-1">时柱</div>
-                                          <div className="font-medium">{baZi.hourPillar.stem}{baZi.hourPillar.branch}</div>
-                                        </div>
-                                      </div>
-                                      <div className="space-y-2">
-                                        <div>
-                                          <span className="font-medium">日主：</span>
-                                          {baZi.dayMaster}（{baZi.strength}）
-                                        </div>
-                                        <div>
-                                          <span className="font-medium">喜用神：</span>
-                                          {baZi.favorable.join("、")}
-                                        </div>
-                                        <div>
-                                          <span className="font-medium">忌用神：</span>
-                                          {baZi.unfavorable.join("、")}
-                                        </div>
-                                      </div>
-                                    </>
-                                  )
-                                })()}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -1105,20 +1138,27 @@ export default function CreatePage() {
                     />
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
                       <div>
-                        <div className="relative bracelet-preview w-full max-w-[300px] mx-auto aspect-square">
-                          <BraceletViewer3D
-                            size={braceletSize}
-                            destinyStones={[bracelet.crystals[0]]}
-                            functionalStones={[bracelet.crystals[1]]}
-                            correctiveStones={[bracelet.crystals[2]]}
-                            layout={braceletLayouts[braceletSize]}
-                            onLayoutGenerated={(layout) => {
-                              setBraceletLayouts(prev => ({
-                                ...prev,
-                                [braceletSize]: layout
-                              }));
-                            }}
-                          />
+                        <div className="text-xl font-medium mb-4">手链预览</div>
+                        <div className="relative bracelet-preview">
+                          <Suspense fallback={
+                            <div className="w-full aspect-square bg-[#f8f5f0] rounded-lg overflow-hidden flex items-center justify-center">
+                              <div className="w-full h-full bg-gray-100 animate-pulse rounded-lg" />
+                            </div>
+                          }>
+                            <BraceletViewer3D
+                              size={braceletSize}
+                              destinyStones={[bracelet.crystals[0]]}
+                              functionalStones={[bracelet.crystals[1]]}
+                              correctiveStones={[bracelet.crystals[2]]}
+                              layout={braceletLayouts[braceletSize]}
+                              onLayoutGenerated={(layout) => {
+                                setBraceletLayouts(prev => ({
+                                  ...prev,
+                                  [braceletSize]: layout
+                                }));
+                              }}
+                            />
+                          </Suspense>
                         </div>
                         <div className="mt-4 text-center">
                           <span className="text-[#666666]">已选择尺寸：</span>

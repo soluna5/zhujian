@@ -18,15 +18,15 @@ const HOUR_TO_BRANCH: Record<number, EarthlyBranch> = {
   14: "未", 15: "申", 16: "申",
   17: "酉", 18: "酉", 19: "戌",
   20: "戌", 21: "亥", 22: "亥"
-}
+} as const;
 
 // 月支对应表（寅月为正月）
-const MONTH_TO_BRANCH: Record<number, EarthlyBranch> = {
+const MONTH_TO_BRANCH: Record<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12, EarthlyBranch> = {
   1: "寅", 2: "卯", 3: "辰",
   4: "巳", 5: "午", 6: "未",
   7: "申", 8: "酉", 9: "戌",
   10: "亥", 11: "子", 12: "丑"
-}
+} as const;
 
 // 五行
 const FIVE_ELEMENTS = {
@@ -109,7 +109,7 @@ const STEM_RELATIONS = {
 } as const;
 
 // 地支藏干表
-const BRANCH_HIDDEN_STEMS = {
+export const BRANCH_HIDDEN_STEMS = {
   子: ["癸"],
   丑: ["己", "癸", "辛"],
   寅: ["甲", "丙", "戊"],
@@ -124,24 +124,8 @@ const BRANCH_HIDDEN_STEMS = {
   亥: ["壬", "甲"]
 } as const;
 
-// 季节旺衰表
-const SEASON_STRENGTH = {
-  春: { 木: 1.2, 火: 1, 土: 0.8, 金: 0.6, 水: 0.8 },
-  夏: { 木: 0.8, 火: 1.2, 土: 1, 金: 0.8, 水: 0.6 },
-  秋: { 木: 0.6, 火: 0.8, 土: 0.8, 金: 1.2, 水: 1 },
-  冬: { 木: 0.8, 火: 0.6, 土: 0.8, 金: 1, 水: 1.2 }
-} as const;
-
-// 根据月份获取季节
-function getSeason(month: number): keyof typeof SEASON_STRENGTH {
-  if (month >= 2 && month <= 4) return "春";
-  if (month >= 5 && month <= 7) return "夏";
-  if (month >= 8 && month <= 10) return "秋";
-  return "冬";
-}
-
-// 计算五行强度
-function calculateElementStrength(
+// 新增：计算身强身弱分数
+function calculateStrengthScore(
   yearStem: HeavenlyStem,
   yearBranch: EarthlyBranch,
   monthStem: HeavenlyStem,
@@ -149,92 +133,497 @@ function calculateElementStrength(
   dayStem: HeavenlyStem,
   dayBranch: EarthlyBranch,
   hourStem: HeavenlyStem,
-  hourBranch: EarthlyBranch,
-  lunarMonth: number
-): Record<FiveElement, number> {
-  const strength: Record<FiveElement, number> = {
-    木: 0,
-    火: 0,
-    土: 0,
-    金: 0,
-    水: 0
+  hourBranch: EarthlyBranch
+): { 
+  score: number; 
+  status: string[]; 
+  strengthLevel: string; 
+  specialPattern?: string;
+  seasonalAdjustment?: string;
+  conflictingElements?: string;
+  recommendedElements?: string;
+} {
+  const dayMasterElement = FIVE_ELEMENTS[dayStem];
+  let score = 0;
+  const status: string[] = [];
+
+  // 1. 检查月令
+  const monthBranchElement = FIVE_ELEMENTS[monthBranch];
+  if (monthBranchElement === dayMasterElement || 
+      FIVE_ELEMENTS_RELATIONS[monthBranchElement].生 === dayMasterElement) {
+    score += 40;
+    status.push("得月令");
+  }
+
+  // 2. 检查其他天干
+  if (FIVE_ELEMENTS[yearStem] === dayMasterElement) {
+    score += 8;
+    status.push("得势");
+  }
+  if (FIVE_ELEMENTS[monthStem] === dayMasterElement) {
+    score += 12;
+    status.push("得势");
+  }
+  if (FIVE_ELEMENTS[hourStem] === dayMasterElement) {
+    score += 12;
+    status.push("得势");
+  }
+
+  // 3. 检查藏干（除月令外）
+  // 年支藏干
+  const yearHiddenStems = BRANCH_HIDDEN_STEMS[yearBranch];
+  if (yearHiddenStems.length > 0) {
+    if (FIVE_ELEMENTS[yearHiddenStems[0]] === dayMasterElement) score += 4;  // 本气根
+    if (yearHiddenStems[1] && FIVE_ELEMENTS[yearHiddenStems[1]] === dayMasterElement) score += 2;  // 中气根
+    if (yearHiddenStems[2] && FIVE_ELEMENTS[yearHiddenStems[2]] === dayMasterElement) score += 1;  // 余气根
+    if (score > 0) status.push("得地");
+  }
+
+  // 月支藏干（月令本气根不加分，因为月令已加过分）
+  const monthHiddenStems = BRANCH_HIDDEN_STEMS[monthBranch];
+  if (monthHiddenStems.length > 0) {
+    // 月令本气根不加分
+    if (monthHiddenStems[1] && FIVE_ELEMENTS[monthHiddenStems[1]] === dayMasterElement) score += 20;  // 中气根
+    if (monthHiddenStems[2] && FIVE_ELEMENTS[monthHiddenStems[2]] === dayMasterElement) score += 12;  // 余气根
+    if (score > 0) status.push("得地");
+  }
+
+  // 日支藏干
+  const dayHiddenStems = BRANCH_HIDDEN_STEMS[dayBranch];
+  if (dayHiddenStems.length > 0) {
+    if (FIVE_ELEMENTS[dayHiddenStems[0]] === dayMasterElement) score += 12;  // 本气根
+    if (dayHiddenStems[1] && FIVE_ELEMENTS[dayHiddenStems[1]] === dayMasterElement) score += 7;   // 中气根
+    if (dayHiddenStems[2] && FIVE_ELEMENTS[dayHiddenStems[2]] === dayMasterElement) score += 4;   // 余气根
+    if (score > 0) status.push("得地");
+  }
+
+  // 时支藏干
+  const hourHiddenStems = BRANCH_HIDDEN_STEMS[hourBranch];
+  if (hourHiddenStems.length > 0) {
+    if (FIVE_ELEMENTS[hourHiddenStems[0]] === dayMasterElement) score += 12;  // 本气根
+    if (hourHiddenStems[1] && FIVE_ELEMENTS[hourHiddenStems[1]] === dayMasterElement) score += 7;   // 中气根
+    if (hourHiddenStems[2] && FIVE_ELEMENTS[hourHiddenStems[2]] === dayMasterElement) score += 4;   // 余气根
+    if (score > 0) status.push("得地");
+  }
+
+  // 4. 判断身强身弱等级和特殊格局
+  let strengthLevel = "";
+  let specialPattern: string | undefined;
+  let seasonalAdjustment: string | undefined;
+
+  if (score <= 20) {
+    strengthLevel = "极弱，需进一步验证特殊格局";
+    // 检查从格
+    const elementCounts: Record<FiveElement, number> = {
+      木: 0, 火: 0, 土: 0, 金: 0, 水: 0
+    };
+    
+    // 计算各元素出现次数
+    [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+      elementCounts[FIVE_ELEMENTS[stem]]++;
+    });
+    [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+      elementCounts[FIVE_ELEMENTS[branch]]++;
+      // 计算藏干的元素
+      BRANCH_HIDDEN_STEMS[branch].forEach(hiddenStem => {
+        elementCounts[FIVE_ELEMENTS[hiddenStem]]++;
+      });
+    });
+
+    // 检查是否有元素出现>=4次
+    for (const [element, count] of Object.entries(elementCounts)) {
+      if (count >= 4) {
+        const generatingElement = Object.entries(FIVE_ELEMENTS_RELATIONS).find(
+          ([_, relations]) => relations.生 === element
+        )?.[0] as FiveElement;
+        specialPattern = `从格，喜${element}、${generatingElement}`;
+        break;
+      }
+    }
+  } else if (score > 80) {
+    strengthLevel = "极强，需进一步验证特殊格局";
+    // 检查专旺格
+    const hasRestraining = [yearStem, monthStem, hourStem, yearBranch, monthBranch, dayBranch, hourBranch].some(char => {
+      const element = FIVE_ELEMENTS[char];
+      return FIVE_ELEMENTS_RELATIONS[element].克 === dayMasterElement;
+    });
+    
+    if (!hasRestraining) {
+      const generatingElement = FIVE_ELEMENTS_RELATIONS[dayMasterElement].被生;
+      specialPattern = `专旺格，喜${dayMasterElement}、${generatingElement}`;
+    }
+  } else if (score > 60) {
+    const relations = FIVE_ELEMENTS_RELATIONS[dayMasterElement];
+    strengthLevel = `身强，喜${relations.生}、${relations.克}`;
+  } else if (score > 40) {
+    strengthLevel = "平衡，无特殊扶抑用神需求";
+  } else {
+    const relations = FIVE_ELEMENTS_RELATIONS[dayMasterElement];
+    strengthLevel = `身弱，喜${relations.被生}、${dayMasterElement}`;
+  }
+
+  // 如果没有特殊格局，检查调侯需求
+  if (!specialPattern) {
+    // 定义冬季和夏季的地支
+    const WINTER_BRANCHES = ["亥", "子", "丑"];
+    const SUMMER_BRANCHES = ["巳", "午", "未"];
+    
+    // 获取所有天干和藏干的五行
+    const allElements = new Set<FiveElement>();
+    // 添加天干的五行
+    [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+      allElements.add(FIVE_ELEMENTS[stem]);
+    });
+    // 添加藏干的五行
+    [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+      BRANCH_HIDDEN_STEMS[branch].forEach(hiddenStem => {
+        allElements.add(FIVE_ELEMENTS[hiddenStem]);
+      });
+    });
+    
+    // 获取所有地支的五行
+    const branchElements = new Set<FiveElement>();
+    [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+      branchElements.add(FIVE_ELEMENTS[branch]);
+    });
+
+    // 检查冬季调侯
+    if (WINTER_BRANCHES.includes(monthBranch)) {
+      const hasFireElement = allElements.has("火");
+      
+      // 检查火元素是否得地（本气根）
+      const hasFireRoot = [yearBranch, monthBranch, dayBranch, hourBranch].some(branch => {
+        const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
+        return hiddenStems.length > 0 && FIVE_ELEMENTS[hiddenStems[0]] === "火";
+      });
+
+      // 检查火元素是否得势（有生火或同火）
+      const hasFireSupport = [...allElements].some(element => 
+        FIVE_ELEMENTS_RELATIONS[element].生 === "火" || element === "火"
+      );
+
+      // 计算火的力量
+      let fireStrength = 0;
+      // 天干中的火
+      [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+        if (FIVE_ELEMENTS[stem] === "火") fireStrength += 10;
+      });
+      // 地支藏干中的火
+      [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+        const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
+        if (hiddenStems[0] && FIVE_ELEMENTS[hiddenStems[0]] === "火") fireStrength += 6;  // 本气根
+        if (hiddenStems[1] && FIVE_ELEMENTS[hiddenStems[1]] === "火") fireStrength += 4;  // 中气根
+        if (hiddenStems[2] && FIVE_ELEMENTS[hiddenStems[2]] === "火") fireStrength += 2;  // 余气根
+      });
+
+      // 计算克火（水）的力量
+      let waterStrength = 0;
+      // 天干中的水
+      [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+        if (FIVE_ELEMENTS[stem] === "水") waterStrength += 10;
+      });
+      // 地支藏干中的水
+      [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+        const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
+        if (hiddenStems[0] && FIVE_ELEMENTS[hiddenStems[0]] === "水") waterStrength += 6;  // 本气根
+        if (hiddenStems[1] && FIVE_ELEMENTS[hiddenStems[1]] === "水") waterStrength += 4;  // 中气根
+        if (hiddenStems[2] && FIVE_ELEMENTS[hiddenStems[2]] === "水") waterStrength += 2;  // 余气根
+      });
+
+      // 火被克的判断：水的力量超过火的力量
+      const hasFireConflict = waterStrength > fireStrength;
+
+      if (!hasFireElement || (!hasFireRoot && !hasFireSupport) || hasFireConflict) {
+        seasonalAdjustment = "有寒性调侯需求，喜火/木";
+      } else {
+        seasonalAdjustment = "无需调侯";
+      }
+    }
+    
+    // 检查夏季调侯
+    if (SUMMER_BRANCHES.includes(monthBranch)) {
+      const hasWaterElement = allElements.has("水");
+      
+      // 检查水元素是否得地（本气根）
+      const hasWaterRoot = [yearBranch, monthBranch, dayBranch, hourBranch].some(branch => {
+        const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
+        return hiddenStems.length > 0 && FIVE_ELEMENTS[hiddenStems[0]] === "水";
+      });
+
+      // 检查水元素是否得势（有生水或同水）
+      const hasWaterSupport = [...allElements].some(element => 
+        FIVE_ELEMENTS_RELATIONS[element].生 === "水" || element === "水"
+      );
+
+      // 计算水的力量
+      let waterStrength = 0;
+      // 天干中的水
+      [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+        if (FIVE_ELEMENTS[stem] === "水") waterStrength += 10;
+      });
+      // 地支藏干中的水
+      [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+        const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
+        if (hiddenStems[0] && FIVE_ELEMENTS[hiddenStems[0]] === "水") waterStrength += 6;  // 本气根
+        if (hiddenStems[1] && FIVE_ELEMENTS[hiddenStems[1]] === "水") waterStrength += 4;  // 中气根
+        if (hiddenStems[2] && FIVE_ELEMENTS[hiddenStems[2]] === "水") waterStrength += 2;  // 余气根
+      });
+
+      // 计算克水（土）的力量
+      let earthStrength = 0;
+      // 天干中的土
+      [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+        if (FIVE_ELEMENTS[stem] === "土") earthStrength += 10;
+      });
+      // 地支藏干中的土
+      [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+    const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
+        if (hiddenStems[0] && FIVE_ELEMENTS[hiddenStems[0]] === "土") earthStrength += 6;  // 本气根
+        if (hiddenStems[1] && FIVE_ELEMENTS[hiddenStems[1]] === "土") earthStrength += 4;  // 中气根
+        if (hiddenStems[2] && FIVE_ELEMENTS[hiddenStems[2]] === "土") earthStrength += 2;  // 余气根
+      });
+
+      // 水被克的判断：土的力量超过水的力量
+      const hasWaterConflict = earthStrength > waterStrength;
+
+      if (!hasWaterElement || (!hasWaterRoot && !hasWaterSupport) || hasWaterConflict) {
+        seasonalAdjustment = "有热性调侯需求，喜水";
+      } else {
+        seasonalAdjustment = "无需调侯";
+      }
+    }
+  }
+
+  // 计算通关用神
+  let conflictingElements: string | undefined;
+  
+  // 统计五行出现次数
+  const elementCounts: Record<FiveElement, number> = {
+    木: 0, 火: 0, 土: 0, 金: 0, 水: 0
   };
 
-  console.log('=== Element Strength Calculation ===');
-  console.log('Stems:', { yearStem, monthStem, dayStem, hourStem });
-  console.log('Branches:', { yearBranch, monthBranch, dayBranch, hourBranch });
-
-  // 获取季节强度系数
-  const season = getSeason(lunarMonth);
-  const seasonStrength = SEASON_STRENGTH[season];
-
-  console.log('Season:', season);
-  console.log('Season strength:', seasonStrength);
-
-  // 计算天干的五行强度
-  const stems = [yearStem, monthStem, dayStem, hourStem];
-  stems.forEach(stem => {
-    if (!FIVE_ELEMENTS[stem]) {
-      console.error('Invalid stem:', stem);
-      return;
-    }
-    const element = FIVE_ELEMENTS[stem];
-    strength[element] += 1 * seasonStrength[element];
+  // 统计天干中的五行
+  [yearStem, monthStem, dayStem, hourStem].forEach(stem => {
+    elementCounts[FIVE_ELEMENTS[stem]]++;
   });
 
-  // 计算地支藏干的五行强度
-  const branches = [yearBranch, monthBranch, dayBranch, hourBranch];
-  branches.forEach(branch => {
-    if (!BRANCH_HIDDEN_STEMS[branch]) {
-      console.error('Invalid branch:', branch);
-      return;
-    }
-    const hiddenStems = BRANCH_HIDDEN_STEMS[branch];
-    hiddenStems.forEach(stem => {
-      if (!FIVE_ELEMENTS[stem]) {
-        console.error('Invalid hidden stem:', stem);
-        return;
+  // 统计地支中的五行
+  [yearBranch, monthBranch, dayBranch, hourBranch].forEach(branch => {
+    elementCounts[FIVE_ELEMENTS[branch]]++;
+  });
+
+  // 检查相克的五行对
+  const conflictPairs = [
+    ["金", "木"],
+    ["木", "土"],
+    ["土", "水"],
+    ["水", "火"],
+    ["火", "金"]
+  ] as const;
+
+  for (const [elem1, elem2] of conflictPairs) {
+    if (elementCounts[elem1] >= 3 && elementCounts[elem2] >= 3) {
+      // 找出这对相克元素之间的调和元素
+      let mediator: FiveElement;
+      if (FIVE_ELEMENTS_RELATIONS[elem1].克 === elem2) {
+        // elem1克elem2，需要生elem2的元素
+        mediator = FIVE_ELEMENTS_RELATIONS[elem2].被生;
+      } else {
+        // elem2克elem1，需要生elem1的元素
+        mediator = FIVE_ELEMENTS_RELATIONS[elem1].被生;
       }
-      const element = FIVE_ELEMENTS[stem];
-      strength[element] += 0.5 * seasonStrength[element];
-    });
-  });
+      conflictingElements = `${elem1}与${elem2}相冲，需${mediator}通关`;
+      break;
+    }
+  }
 
-  console.log('Final strength:', strength);
-  return strength;
+  if (!conflictingElements) {
+    conflictingElements = "无通关用神需求";
+  }
+
+  // 计算最终建议用神
+  let recommendedElements = "";
+  let primaryGod: string | undefined;
+  let secondaryGod: string | undefined;
+
+  // 1. 特殊格局优先
+  if (specialPattern) {
+    const match = specialPattern.match(/喜(.)、(.)/);
+    if (match) {
+      primaryGod = match[1];
+      secondaryGod = match[2];
+    }
+  } 
+  
+  // 2. 如果没有特殊格局，按照调侯、通关、扶抑的优先级选择用神
+  if (!primaryGod || !secondaryGod) {
+    // 检查调侯用神
+    if (seasonalAdjustment && !seasonalAdjustment.includes("无需")) {
+      if (seasonalAdjustment.includes("寒性")) {
+        primaryGod = primaryGod || "火";
+      } else if (seasonalAdjustment.includes("热性")) {
+        primaryGod = primaryGod || "水";
+      }
+    }
+
+    // 如果没有调侯需求，检查通关用神
+    if ((!primaryGod || !secondaryGod) && conflictingElements && !conflictingElements.includes("无")) {
+      const match = conflictingElements.match(/需(.)通关/);
+      if (match && match[1]) {
+        const conflictGod = match[1] as FiveElement;
+        // 检查通关用神是否与现有用神相克
+        const hasConflict = primaryGod && (
+          FIVE_ELEMENTS_RELATIONS[conflictGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(primaryGod) || 
+          FIVE_ELEMENTS_RELATIONS[primaryGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(conflictGod)
+        );
+
+        if (!hasConflict) {
+          if (!primaryGod) {
+            primaryGod = conflictGod;
+          } else if (!secondaryGod && conflictGod !== primaryGod) {
+            secondaryGod = conflictGod;
+          }
+        }
+        // 如果有相克，直接跳过通关用神，进入扶抑用神的选择
+      }
+    }
+
+    // 如果还没有确定用神，使用扶抑用神
+    if (!primaryGod || !secondaryGod) {
+      const relations = FIVE_ELEMENTS_RELATIONS[dayMasterElement];
+      if (score > 60) {
+        // 身强用泄气和耗气
+        if (!primaryGod) {
+          primaryGod = relations.生;  // 泄气
+        }
+        if (!secondaryGod) {
+          // 身强时优先级：泄、克、耗
+          const potentialSecondaryGods: FiveElement[] = [relations.生, relations.克];
+          // 检查每个潜在的次用神是否与主用神相克
+          for (const potential of potentialSecondaryGods) {
+            if (potential !== primaryGod && 
+                !FIVE_ELEMENTS_RELATIONS[potential as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(primaryGod) && 
+                !FIVE_ELEMENTS_RELATIONS[primaryGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(potential)) {
+              secondaryGod = potential;
+              break;
+            }
+          }
+        }
+      } else if (score < 40) {
+        // 身弱用生我和同我
+        if (!primaryGod) {
+          primaryGod = relations.被生;  // 生我
+        }
+        if (!secondaryGod) {
+          // 身弱时优先级：生我、同我
+          const potentialSecondaryGods: FiveElement[] = [relations.被生, dayMasterElement];
+          // 检查每个潜在的次用神是否与主用神相克
+          for (const potential of potentialSecondaryGods) {
+            if (potential !== primaryGod && 
+                !FIVE_ELEMENTS_RELATIONS[potential as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(primaryGod) && 
+                !FIVE_ELEMENTS_RELATIONS[primaryGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(potential)) {
+              secondaryGod = potential;
+              break;
+            }
+          }
+        }
+      } else {
+        // 平衡格局
+        if (!primaryGod) {
+          primaryGod = relations.被生;  // 生我
+        }
+        if (!secondaryGod) {
+          // 平衡时优先级：生我、同我
+          const potentialSecondaryGods: FiveElement[] = [relations.被生, dayMasterElement];
+          // 检查每个潜在的次用神是否与主用神相克
+          for (const potential of potentialSecondaryGods) {
+            if (potential !== primaryGod && 
+                !FIVE_ELEMENTS_RELATIONS[potential as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(primaryGod) && 
+                !FIVE_ELEMENTS_RELATIONS[primaryGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(potential)) {
+              secondaryGod = potential;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 最后检查主次用神是否相克，如果相克则去掉次用神
+  if (secondaryGod && (
+      FIVE_ELEMENTS_RELATIONS[secondaryGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(primaryGod) || 
+      FIVE_ELEMENTS_RELATIONS[primaryGod as keyof typeof FIVE_ELEMENTS_RELATIONS].克.includes(secondaryGod)
+  )) {
+    secondaryGod = undefined;
+  }
+
+  // 构建最终用神说明
+  if (specialPattern) {
+    recommendedElements = specialPattern;
+  } else if (seasonalAdjustment && !seasonalAdjustment.includes("无需")) {
+    recommendedElements = seasonalAdjustment;
+  } else if (conflictingElements && !conflictingElements.includes("无")) {
+    recommendedElements = conflictingElements;
+  } else if (score > 60) {
+    recommendedElements = "身强格局";
+  } else if (score < 40) {
+    recommendedElements = "身弱格局";
+  } else {
+    recommendedElements = "平衡格局";
+  }
+
+  // 添加主次用神说明
+  recommendedElements = `${recommendedElements}（主用神：${primaryGod}，次用神：${secondaryGod}）`;
+
+  return { 
+    score, 
+    status: [...new Set(status)], 
+    strengthLevel, 
+    specialPattern, 
+    seasonalAdjustment,
+    conflictingElements,
+    recommendedElements
+  };
 }
 
-// 判断身强身弱
+// 修改原有的 determineStrength 函数
 function determineStrength(
   dayMasterElement: FiveElement,
-  elementStrengths: Record<FiveElement, number>
-): "强" | "弱" {
-  const dayMasterStrength = elementStrengths[dayMasterElement];
-  const otherElementsAvg = (Object.values(elementStrengths).reduce((a, b) => a + b, 0) - dayMasterStrength) / 4;
+  yearStem: HeavenlyStem,
+  yearBranch: EarthlyBranch,
+  monthStem: HeavenlyStem,
+  monthBranch: EarthlyBranch,
+  dayStem: HeavenlyStem,
+  dayBranch: EarthlyBranch,
+  hourStem: HeavenlyStem,
+  hourBranch: EarthlyBranch
+): { 
+  strength: "强" | "弱", 
+  score: number, 
+  status: string[], 
+  strengthLevel: string, 
+  specialPattern?: string,
+  seasonalAdjustment?: string,
+  conflictingElements?: string,
+  recommendedElements?: string
+} {
+  const result = calculateStrengthScore(
+    yearStem, yearBranch,
+    monthStem, monthBranch,
+    dayStem, dayBranch,
+    hourStem, hourBranch
+  );
   
-  return dayMasterStrength > otherElementsAvg ? "强" : "弱";
-}
-
-// 根据身强身弱确定喜用神和忌用神
-function determineFavorableElements(
-  dayMasterElement: FiveElement,
-  isStrong: boolean
-): { favorable: FiveElement[]; unfavorable: FiveElement[] } {
-  const relations = FIVE_ELEMENTS_RELATIONS[dayMasterElement];
-  
-  if (isStrong) {
-    // 身强则喜克、泄、耗，忌生、助
     return {
-      favorable: [relations.被克, relations.生, relations.克],  // 克：克我的，泄：我生的，耗：我克的
-      unfavorable: [relations.被生, dayMasterElement] // 生：生我的，助：同我者
-    };
-  } else {
-    // 身弱则喜生、助，忌克、泄、耗
-    return {
-      favorable: [relations.被生, dayMasterElement],  // 生：生我的，助：同我者
-      unfavorable: [relations.被克, relations.生, relations.克] // 克：克我的，泄：我生的，耗：我克的
-    };
-  }
+    strength: result.score > 40 ? "强" : "弱",
+    score: result.score,
+    status: result.status,
+    strengthLevel: result.strengthLevel,
+    specialPattern: result.specialPattern,
+    seasonalAdjustment: result.seasonalAdjustment,
+    conflictingElements: result.conflictingElements,
+    recommendedElements: result.recommendedElements
+  };
 }
 
 export interface BaZiResult {
@@ -243,11 +632,15 @@ export interface BaZiResult {
   dayPillar: { stem: HeavenlyStem; branch: EarthlyBranch }
   hourPillar: { stem: HeavenlyStem; branch: EarthlyBranch }
   fiveElements: FiveElement[]
-  favorable: FiveElement[]
-  unfavorable: FiveElement[]
-  recommendedCrystals: string[]
   dayMaster: FiveElement
   strength: "强" | "弱"
+  strengthScore: number
+  strengthStatus: string[]
+  strengthLevel: string
+  specialPattern?: string
+  seasonalAdjustment?: string
+  conflictingElements?: string
+  recommendedElements?: string
 }
 
 interface LunarDate {
@@ -409,58 +802,35 @@ export function calculateBaZi(birthTime: string): BaZiResult {
   console.log('Hour stem:', hourStem);
   console.log('Hour branch:', hourBranch);
 
-  // 计算五行强度
-  const elementStrengths = calculateElementStrength(
+  // Get day master element
+  const dayMasterElement = FIVE_ELEMENTS[dayStem];
+
+  // Calculate strength
+  const strengthResult = determineStrength(
+    dayMasterElement,
     yearStem, yearBranch,
     monthStem, monthBranch,
     dayStem, dayBranch,
-    hourStem, hourBranch,
-    solar.getMonth()
+    hourStem, hourBranch
   );
-
-  // 获取日主五行
-  const dayMasterElement = FIVE_ELEMENTS[dayStem];
-
-  // 判断身强身弱
-  const strength = determineStrength(dayMasterElement, elementStrengths);
-
-  // 确定喜用神和忌用神
-  const { favorable, unfavorable } = determineFavorableElements(dayMasterElement, strength === "强");
-
-  // 计算所有出现的五行
-  const fiveElements = calculateFiveElements(yearStem, yearBranch, monthStem, monthBranch, dayStem, dayBranch, hourStem, hourBranch);
-
-  // 推荐水晶
-  const recommendedCrystals = Object.entries(CRYSTAL_ELEMENTS)
-    .filter(([, element]) => favorable.includes(element))
-    .map(([crystal]) => crystal)
-    .slice(0, 3);
 
   return {
     yearPillar: { stem: yearStem, branch: yearBranch },
     monthPillar: { stem: monthStem, branch: monthBranch },
     dayPillar: { stem: dayStem, branch: dayBranch },
     hourPillar: { stem: hourStem, branch: hourBranch },
-    fiveElements,
-    favorable,
-    unfavorable,
-    recommendedCrystals,
+    fiveElements: [
+      FIVE_ELEMENTS[yearStem], FIVE_ELEMENTS[monthStem],
+      FIVE_ELEMENTS[dayStem], FIVE_ELEMENTS[hourStem]
+    ],
     dayMaster: dayMasterElement,
-    strength
+    strength: strengthResult.strength,
+    strengthScore: strengthResult.score,
+    strengthStatus: strengthResult.status,
+    strengthLevel: strengthResult.strengthLevel,
+    specialPattern: strengthResult.specialPattern,
+    seasonalAdjustment: strengthResult.seasonalAdjustment,
+    conflictingElements: strengthResult.conflictingElements,
+    recommendedElements: strengthResult.recommendedElements
   };
-}
-
-// Helper functions for calculating five elements, favorable elements, etc.
-function calculateFiveElements(yearStem: HeavenlyStem, yearBranch: EarthlyBranch, monthStem: HeavenlyStem, monthBranch: EarthlyBranch, dayStem: HeavenlyStem, dayBranch: EarthlyBranch, hourStem: HeavenlyStem, hourBranch: EarthlyBranch): FiveElement[] {
-  const elements = new Set([
-    FIVE_ELEMENTS[yearStem],
-    FIVE_ELEMENTS[yearBranch],
-    FIVE_ELEMENTS[monthStem],
-    FIVE_ELEMENTS[monthBranch],
-    FIVE_ELEMENTS[dayStem],
-    FIVE_ELEMENTS[dayBranch],
-    FIVE_ELEMENTS[hourStem],
-    FIVE_ELEMENTS[hourBranch]
-  ]);
-  return Array.from(elements);
 } 
