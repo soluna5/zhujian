@@ -1071,7 +1071,7 @@ export default function CreatePage() {
                                 }`}
                               >
                                 小
-                                <div>(4.5mm-)</div>
+                                <div>(～4mm)</div>
                               </button>
                               <button
                                 onClick={() => handleSizeChange("medium")}
@@ -1080,7 +1080,7 @@ export default function CreatePage() {
                                 }`}
                               >
                                 中
-                                <div>(4.5-6mm)</div>
+                                <div>(～6mm)</div>
                               </button>
                               <button
                                 onClick={() => handleSizeChange("large")}
@@ -1089,7 +1089,7 @@ export default function CreatePage() {
                                 }`}
                               >
                                 大
-                                <div>(6mm+)</div>
+                                <div>(～8mm)</div>
                               </button>
                             </div>
                           </div>
@@ -1163,9 +1163,9 @@ export default function CreatePage() {
                         <div className="mt-4 text-center">
                           <span className="text-[#666666]">已选择尺寸：</span>
                           <span className="font-medium text-[#333333]">
-                            {braceletSize === "small" ? "小 (4.5mm-)" : 
-                             braceletSize === "medium" ? "中 (4.5-6mm)" : 
-                             "大 (6mm+)"}
+                            {braceletSize === "small" ? "小 (～4mm)" : 
+                             braceletSize === "medium" ? "中 (～6mm)" : 
+                             "大 (～8mm)"}
                           </span>
                         </div>
                       </div>
