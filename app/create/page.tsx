@@ -347,7 +347,7 @@ export default function CreatePage() {
         }
       })
 
-      const imageUrl = canvas.toDataURL('image/webp', 0.2)
+      const imageUrl = canvas.toDataURL('image/webp', 0.8)
       if (!imageUrl || imageUrl === 'data:,') {
         throw new Error('生成图片URL失败')
       }
