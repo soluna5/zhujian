@@ -689,62 +689,6 @@ export const crystalData: Crystal[] = [
     incompatibleWith: ["黑曜石"]
   },
   
-  
-  // 东陵玉
-  {
-    id: "dongling_jade",
-    name: "东陵玉",
-    description: "东陵玉承载着东方古老的智慧精髓，能为使用者带来平衡和和谐。东陵玉可以安抚心神，帮助找到内在的中庸之道，是修身养性的上佳选择。它还能增强智慧和洞察力，帮助使用者更好地理解人生哲理。",
-    images: {
-      spacer: "/images/crystals/dongling_jade/spacer.png",
-      round: "/images/crystals/dongling_jade/round.png",
-      raw: "/images/crystals/dongling_jade/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["木", "火"],
-      unsupportiveElements: ["土"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        balance: true,
-        protection: false,
-        relationship: false,
-        wealth: false,
-        career: false
-      },
-      impressions: {
-        reliable: true,
-        insightful: false,
-        warm: false,
-        charming: false
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        energySensitive: true,
-        indecisive: false,
-        socialDrain: false,
-        fatigue: false
-      },
-      potentials: {
-        intuition: true,
-        decision: false,
-        empathy: false,
-        expression: false,
-        efficiency: false
-      },
-      healthIssues: {
-        stress: true,
-        sleep: false,
-        immunity: false,
-        circulation: false,
-        respiratory: false,
-        mood: false,
-        hormonal: false
-      }
-    },
-    incompatibleWith: ["黑碧玺"]
-  },
   // 橄榄石
   {
     id: "peridot",
