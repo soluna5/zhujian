@@ -356,62 +356,6 @@ export const crystalData: Crystal[] = [
     },
     incompatibleWith: ["黑曜石"]
   },
-  // 青金石 - 强化表达和智慧特性
-  {
-    id: "lapis_lazuli",
-    name: "青金石",
-    description: "青金石象征着智慧与真实的表达能力，能增强沟通能力和领导魅力。青金石可以开启第三眼轮和喉轮，增强精神洞察力，促进真理的探索。它还能增强记忆力和学习能力，帮助使用者更好地理解和表达复杂的概念。",
-    images: {
-      spacer: "/images/crystals/qingjinshi/spacer.png",
-      round: "/images/crystals/qingjinshi/round.png",
-      raw: "/images/crystals/qingjinshi/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["木", "火"],
-      unsupportiveElements: ["土"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        career: true,
-        protection: false,
-        relationship: false,
-        wealth: false,
-        balance: false
-      },
-      impressions: {
-        charming: true,
-        insightful: false,
-        warm: false,
-        reliable: false
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        socialDrain: true,
-        indecisive: false,
-        energySensitive: false,
-        fatigue: false
-      },
-      potentials: {
-        expression: true,
-        intuition: false,
-        empathy: false,
-        decision: false,
-        efficiency: false
-      },
-      healthIssues: {
-        respiratory: true,
-        stress: false,
-        sleep: false,
-        immunity: false,
-        circulation: false,
-        mood: false,
-        hormonal: false
-      }
-    },
-    incompatibleWith: []
-  },
-  
   // 红玛瑙 - 强化勇气和活力特性
   {
     id: "red_agate",

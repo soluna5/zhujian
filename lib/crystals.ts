@@ -473,11 +473,10 @@ export function selectCrystals(
         "fenjing",       // 粉晶
         "citrine",       // 黄水晶
         "dongling_jade", // 东陵玉
-        "kyanite",       // 蓝晶石
-        "kunzite",       // 紫锂辉
         "smoky_quartz",  // 茶晶
         "strawberry_quartz", // 草莓晶
-        "green_strawberry_quartz" // 绿草莓晶
+        "green_strawberry_quartz", // 绿草莓晶
+        "clear_quartz"   // 白水晶
       ];
 
       const correctiveScoredCrystals = crystalData
