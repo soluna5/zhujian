@@ -1072,63 +1072,6 @@ export const crystalData: Crystal[] = [
   },
   
   
-  // 草莓晶 - 强化爱的能量和情感治愈特性
-  {
-    id: "strawberry_quartz",
-    name: "草莓晶",
-    description: "草莓晶充满温暖的爱的能量，能促进深层的情感治愈。草莓晶可以打开心轮，帮助接纳和疗愈内在创伤，让心灵重获温暖与力量。它还能增强同理心和包容度，帮助使用者更好地理解和接纳他人。",
-    images: {
-      spacer: "/images/crystals/strawberry_quartz/spacer.png",
-      round: "/images/crystals/strawberry_quartz/round.png",
-      raw: "/images/crystals/strawberry_quartz/raw.png"
-    },
-    destinyAttributes: {
-      supportiveElements: ["火", "土"],
-      unsupportiveElements: ["金"]
-    },
-    functionalAttributes: {
-      primaryPurposes: {
-        relationship: true,
-        balance: false,
-        protection: false,
-        wealth: false,
-        career: false
-      },
-      impressions: {
-        warm: true,
-        charming: false,
-        reliable: false,
-        insightful: false
-      },
-    },
-    correctiveAttributes: {
-      correctiveProperties: {
-        socialDrain: true,
-        fatigue: false,
-        indecisive: false,
-        energySensitive: false
-      },
-      potentials: {
-        empathy: true,
-        expression: false,
-        decision: false,
-        intuition: false,
-        efficiency: false
-      },
-      healthIssues: {
-        mood: true,
-        stress: false,
-        sleep: false,
-        immunity: false,
-        circulation: false,
-        respiratory: false,
-        hormonal: false
-      }
-    },
-    incompatibleWith: ["黑碧玺"]
-  },
-  
-  
   // 黄方解石 - 强化自信和积极能量特性
   {
     id: "yellow_calcite",
