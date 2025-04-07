@@ -47,41 +47,20 @@ function scoreCrystal(
     // 过滤掉 undefined 值，只保留有效的喜用神
     const validFavorableElements = favorableElements.filter(element => element !== 'undefined');
     
-    // 当喜用神只有一个时，只要包含这个喜用神就符合要求
-    if (validFavorableElements.length === 1) {
-      if (crystalElements.includes(validFavorableElements[0])) {
-        console.log(`水晶 ${crystal.name} 包含喜用神 ${validFavorableElements[0]}，给予1000分`);
-        destinyScore = 1000;
-        details['命理分数'] = destinyScore;
-        totalScore += destinyScore;
-      } else {
-        console.log(`水晶 ${crystal.name} 不包含喜用神 ${validFavorableElements[0]}，直接排除`);
-        return { score: -1000, details: { '命理分数': -1000 } };
-      }
+    // 检查水晶支持元素是否匹配喜用神
+    if (crystalElements[0] === validFavorableElements[0]) {
+      console.log(`水晶 ${crystal.name} 匹配第一个喜用神 ${validFavorableElements[0]}，给予200分`);
+      destinyScore = 200;
+    } else if (crystalElements[0] === validFavorableElements[1]) {
+      console.log(`水晶 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予170分`);
+      destinyScore = 170;
     } else {
-      // 多个喜用神时，需要完全匹配
-      const hasAllFavorableElements = validFavorableElements.every(element => 
-        crystalElements.includes(element)
-      );
-      
-      if (!hasAllFavorableElements) {
-        // 如果是功能石且包含主用神（喜用神的第一个元素），给予500分
-        if (!isCorrective && crystalElements.includes(validFavorableElements[0])) {
-          console.log(`功能石 ${crystal.name} 包含主用神 ${validFavorableElements[0]}，加500分`);
-          destinyScore = 500;
-          details['命理分数'] = destinyScore;
-          totalScore += destinyScore;
-          return { score: totalScore, details };
-        }
-        
-        console.log(`水晶 ${crystal.name} 不完全匹配喜用神，直接排除`);
-        return { score: -1000, details: { '命理分数': -1000 } };
-      }
-      
-      destinyScore = 1000; // 完全匹配给予1000分
-      details['命理分数'] = destinyScore;
-      totalScore += destinyScore;
+      console.log(`水晶 ${crystal.name} 不匹配任何喜用神，直接排除`);
+      return { score: -1000, details: { '命理分数': -1000 } };
     }
+    
+    details['命理分数'] = destinyScore;
+    totalScore += destinyScore;
   }
 
   // 2. 功能属性分数（只有在完全匹配命理且不是修正石的情况下才考虑）
@@ -126,8 +105,26 @@ function scoreCrystal(
       situation,
       healthIssue
     });
-    console.log('功能属性:', JSON.stringify(crystal.functionalAttributes, null, 2));
-    console.log('修正属性:', JSON.stringify(crystal.correctiveAttributes, null, 2));
+    
+    // 检查水晶的支持元素是否匹配喜用神
+    const crystalElements = crystal.destinyAttributes.supportiveElements;
+    const validFavorableElements = favorableElements.filter(element => element !== 'undefined');
+    
+    // 修正石也需要匹配喜用神
+    let destinyScore = 0;
+    if (crystalElements[0] === validFavorableElements[0]) {
+      console.log(`修正石 ${crystal.name} 匹配第一个喜用神 ${validFavorableElements[0]}，给予200分`);
+      destinyScore = 200;
+    } else if (crystalElements[0] === validFavorableElements[1]) {
+      console.log(`修正石 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予170分`);
+      destinyScore = 170;
+    } else {
+      console.log(`修正石 ${crystal.name} 不匹配任何喜用神，直接排除`);
+      return { score: -1000, details: { '命理分数': -1000 } };
+    }
+    
+    details['命理分数'] = destinyScore;
+    totalScore += destinyScore;
     
     // 修正分数计算
     let correctiveScore = 0;
@@ -140,6 +137,8 @@ function scoreCrystal(
       console.log(`匹配健康问题 ${healthIssue}，加20分`);
     }
     console.log(`修正分数: ${correctiveScore}`);
+    details['修正分数'] = correctiveScore;
+    totalScore += correctiveScore;
     
     // 协同分数计算 - 修正石需要检查功能属性
     let synergyScore = 0;
@@ -156,11 +155,8 @@ function scoreCrystal(
       console.log(`匹配潜能属性 ${desiredPotential}，加5分`);
     }
     console.log(`协同分数: ${synergyScore}`);
-    console.log(`总分: ${correctiveScore + synergyScore}\n`);
-    
-    details['修正分数'] = correctiveScore;
     details['协同分数'] = synergyScore;
-    totalScore = correctiveScore + synergyScore;
+    totalScore += synergyScore;
   }
 
   return { score: totalScore, details };
@@ -200,28 +196,25 @@ function scoreDestinyCrystal(
   // 过滤掉 undefined 值，只保留有效的喜用神
   const validFavorableElements = favorableElements.filter(element => element !== 'undefined');
   
-  // 当喜用神只有一个时，只要包含这个喜用神就符合要求
-  if (validFavorableElements.length === 1) {
-    if (!crystalElements.includes(validFavorableElements[0])) {
-      console.log(`命运石 ${crystal.name} 不包含喜用神 ${validFavorableElements[0]}，直接排除`);
-      return { score: -1000, details: { '命理分数': -1000 } };
-    }
+  // 检查水晶支持元素是否匹配喜用神
+  if (crystalElements[0] === validFavorableElements[0]) {
+    console.log(`命运石 ${crystal.name} 匹配第一个喜用神 ${validFavorableElements[0]}，给予200分`);
+    totalScore = 200;
+  } else if (crystalElements[0] === validFavorableElements[1]) {
+    console.log(`命运石 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予170分`);
+    totalScore = 170;
   } else {
-    // 多个喜用神时，需要完全匹配
-    const hasAllFavorableElements = validFavorableElements.every(element => 
-      crystalElements.includes(element)
-    );
-
-    if (!hasAllFavorableElements) {
-      console.log(`命运石 ${crystal.name} 不完全匹配喜用神，直接排除`);
-      return { score: -1000, details: { '命理分数': -1000 } };
-    }
+    console.log(`命运石 ${crystal.name} 不匹配任何喜用神，直接排除`);
+    return { score: -1000, details: { '命理分数': -1000 } };
   }
+  
+  details['命理分数'] = totalScore;
 
   // 1. 主元素匹配度（在匹配喜用神的基础上）
   let mainElementScore = 0;
-  if (crystal.destinyAttributes.supportiveElements.includes(mainElement)) {
+  if (crystal.destinyAttributes.supportiveElements[0] === mainElement) {
     mainElementScore = 5;
+    console.log(`命运石 ${crystal.name} 匹配主元素 ${mainElement}，加5分`);
   }
   details['主元素分数'] = mainElementScore;
   totalScore += mainElementScore;
@@ -414,7 +407,7 @@ export function selectCrystals(
 
       console.log(`\n选中的命运石: ${destinyCrystal.name}`);
       console.log("命运石属性:", {
-        支持元素: destinyCrystal.destinyAttributes.supportiveElements,
+        支持元素: destinyCrystal.destinyAttributes.supportiveElements[0],
         不支持元素: destinyCrystal.destinyAttributes.unsupportiveElements,
         主要功能: Object.entries(destinyCrystal.functionalAttributes.primaryPurposes)
           .filter(([_, value]) => value)
@@ -448,7 +441,7 @@ export function selectCrystals(
 
       functionalScoredCrystals.sort((a, b) => b.score - a.score);
       console.log("\n功能石候选排名:", functionalScoredCrystals.map(c => 
-        `${c.crystal.name}(${c.score}) - 支持元素: ${c.crystal.destinyAttributes.supportiveElements.join(',')}`
+        `${c.crystal.name}(${c.score}) - 支持元素: ${c.crystal.destinyAttributes.supportiveElements[0]}`
       ).join('\n'));
 
       if (functionalScoredCrystals.length === 0) {
@@ -460,7 +453,7 @@ export function selectCrystals(
       const functionalCrystal = functionalScoredCrystals[0].crystal;
       console.log(`\n选中的功能石: ${functionalCrystal.name}`);
       console.log("功能石属性:", {
-        支持元素: functionalCrystal.destinyAttributes.supportiveElements,
+        支持元素: functionalCrystal.destinyAttributes.supportiveElements[0],
         不支持元素: functionalCrystal.destinyAttributes.unsupportiveElements,
         主要功能: Object.entries(functionalCrystal.functionalAttributes.primaryPurposes)
           .filter(([_, value]) => value)
@@ -504,7 +497,7 @@ export function selectCrystals(
 
       correctiveScoredCrystals.sort((a, b) => b.score - a.score);
       console.log("\n修正石候选排名:", correctiveScoredCrystals.map(c => 
-        `${c.crystal.name}(${c.score}) - 支持元素: ${c.crystal.destinyAttributes.supportiveElements.join(',')}`
+        `${c.crystal.name}(${c.score}) - 支持元素: ${c.crystal.destinyAttributes.supportiveElements[0]}`
       ).join('\n'));
 
       if (correctiveScoredCrystals.length === 0) {
@@ -516,7 +509,7 @@ export function selectCrystals(
       const correctiveCrystal = correctiveScoredCrystals[0].crystal;
       console.log(`\n选中的修正石: ${correctiveCrystal.name}`);
       console.log("修正石属性:", {
-        支持元素: correctiveCrystal.destinyAttributes.supportiveElements,
+        支持元素: correctiveCrystal.destinyAttributes.supportiveElements[0],
         不支持元素: correctiveCrystal.destinyAttributes.unsupportiveElements,
         主要功能: Object.entries(correctiveCrystal.functionalAttributes.primaryPurposes)
           .filter(([_, value]) => value)
@@ -605,8 +598,8 @@ export function getAllCrystals(): Array<{id: string, name: string, description: 
 }
 
 // 获取石头的支持元素
-function getSupportiveElements(stone: Crystal): string[] {
-  return stone.destinyAttributes?.supportiveElements || [];
+function getSupportiveElements(stone: Crystal): string {
+  return stone.destinyAttributes?.supportiveElements[0] || '';
 }
 
 // 获取石头的益处

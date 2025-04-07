@@ -310,47 +310,25 @@ export default function CreatePage() {
         return
       }
 
-      // 生成手链图片
+      // 获取手链预览图片
       const braceletPreview = document.querySelector('.bracelet-preview') as HTMLDivElement
       if (!braceletPreview) {
         throw new Error('无法找到手链预览元素')
       }
 
-      // 获取设备宽度
-      const isMobile = window.innerWidth < 768
-      const scale = isMobile ? 1 : 0.75 // 移动设备使用更大的缩放比例
-      const maxSize = isMobile ? 400 : 800 // 移动设备限制最大尺寸
-
+      // 使用html2canvas捕获预览图片
       const canvas = await html2canvas(braceletPreview, {
         backgroundColor: null,
-        scale: scale,
+        scale: window.devicePixelRatio || 1,
         useCORS: true,
         allowTaint: true,
         logging: false,
-        removeContainer: true,
-        imageTimeout: 15000,
-        width: Math.min(braceletPreview.offsetWidth, maxSize),
-        height: Math.min(braceletPreview.offsetHeight, maxSize),
-        foreignObjectRendering: false,
-        ignoreElements: (element) => {
-          return element.classList.contains('ignore-capture')
-        },
-        onclone: (document, element) => {
-          const images = element.getElementsByTagName('img')
-          for (let img of images) {
-            img.style.maxWidth = isMobile ? '150px' : '200px'
-            img.style.maxHeight = isMobile ? '150px' : '200px'
-            if (img.src.includes('data:image')) {
-              img.style.imageRendering = 'optimizeSpeed'
-            }
-          }
-        }
+        width: braceletPreview.offsetWidth,
+        height: braceletPreview.offsetHeight
       })
 
-      const imageUrl = canvas.toDataURL('image/webp', 0.8)
-      if (!imageUrl || imageUrl === 'data:,') {
-        throw new Error('生成图片URL失败')
-      }
+      // 将canvas转换为dataURL
+      const imageUrl = canvas.toDataURL('image/png', 0.8)
 
       // 准备订单数据
       const orderData = {

@@ -9,7 +9,7 @@ interface OrderConfirmation {
   functional_crystal: string // 功能石名称
   corrective_crystal: string // 修正石名称
   bracelet_layout: string   // 珠子排列JSON字符串
-  bracelet_design_url: string // 手链设计图片URL
+  bracelet_design_url?: string // 手链设计图片URL（可选，由服务器生成）
 }
 
 export async function saveOrderConfirmation(data: OrderConfirmation) {

@@ -214,43 +214,71 @@ export const generateBeadLayout = ({ size, destinyStones, functionalStones, corr
     }
     
     case "small": {
-      // 细手链：45颗珠子，1修正石垫片，22功能石，22命运石（分两组）
-      const totalBeads = 45;
-      const groupSize = 22; // 每组22颗珠子
-      
-      // 修正石垫片固定在两组珠子中间
-      const corrSpacerPos = groupSize;
-      
-      // 生成基础随机模式（11功能石 + 11命运石）
-      const basePattern = generateGroupPattern(groupSize, functionalStone, destinyStone, 0);
+      // 细手链：44颗珠子，第一组4颗（修正石，修正石，命运石，修正石），第二组40颗（20功能石，20命运石）
+      const totalBeads = 44;
+      const firstGroupSize = 4;
+      const secondGroupSize = 40;
       
       // 创建最终的珠子数组
       const beads: Bead[] = [];
       
-      // 添加第一组珠子（反向顺序：从外到内）
-      for (let i = groupSize - 1; i >= 0; i--) {
-        beads.push({
-          ...basePattern[i],
-          position: groupSize - 1 - i
-        });
+      // 添加第一组珠子
+      const firstGroup: Bead[] = [
+        {
+          position: 0,
+          type: "correction",
+          shape: "round",
+          code: correctiveStone.id,
+          imageUrl: correctiveStone.images.round
+        },
+        {
+          position: 1,
+          type: "correction",
+          shape: "round",
+          code: correctiveStone.id,
+          imageUrl: correctiveStone.images.round
+        },
+        {
+          position: 2,
+          type: "destiny",
+          shape: "round",
+          code: destinyStone.id,
+          imageUrl: destinyStone.images.round
+        },
+        {
+          position: 3,
+          type: "correction",
+          shape: "round",
+          code: correctiveStone.id,
+          imageUrl: correctiveStone.images.round
+        }
+      ];
+      beads.push(...firstGroup);
+      
+      // 生成第二组珠子的位置数组
+      const positions = Array.from({ length: secondGroupSize }, (_, i) => i + firstGroupSize);
+      
+      // 随机选择前20个位置作为功能石位置
+      const shuffledPositions = [...positions];
+      for (let i = shuffledPositions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledPositions[i], shuffledPositions[j]] = [shuffledPositions[j], shuffledPositions[i]];
       }
       
-      // 添加修正石垫片在中间位置
-      beads.push({
-        position: corrSpacerPos,
-        type: "correction",
-        shape: "spacer",
-        code: correctiveStone.id,
-        imageUrl: correctiveStone.images.round
+      // 前20个位置为功能石，后20个位置为命运石
+      const functionalPositions = new Set(shuffledPositions.slice(0, secondGroupSize / 2));
+      
+      // 填充第二组珠子
+      positions.forEach(pos => {
+        const bead: Bead = {
+          position: pos,
+          type: functionalPositions.has(pos) ? "function" : "destiny",
+          shape: "round",
+          code: functionalPositions.has(pos) ? functionalStone.id : destinyStone.id,
+          imageUrl: functionalPositions.has(pos) ? functionalStone.images.round : destinyStone.images.round
+        };
+        beads.push(bead);
       });
-      
-      // 添加第二组珠子（反向顺序：从内到外）
-      for (let i = 0; i < groupSize; i++) {
-        beads.push({
-          ...basePattern[i],
-          position: corrSpacerPos + 1 + i
-        });
-      }
       
       return beads;
     }
