@@ -511,7 +511,7 @@ export default function CreatePage() {
           primaryNeed: formData.primaryNeed,
           correctiveSituation: formData.correctiveSituation,
           conversationId: conversationData.conversation_id,
-          instructions: "请创作一首意境优美的古风诗作：1. 以自然意象暗喻内在能量，不要出现任何佩戴、手链等直白词语 2. 每句4-7字，格律自然 3. 意境空灵，意蕴深远 4. 可以借鉴山水、花鸟、风月等传统意象 5. 整体氛围清雅脱俗"
+          instructions: "请创作一首意境优美的古风诗作：1. 以自然意象暗喻内在能量，不要出现任何佩戴、手链等直白词语 2. 每句4-7字，格律自然 3. 意境空灵，意蕴深远 4. 整体氛围清雅脱俗"
         }),
       });
 
@@ -661,7 +661,7 @@ export default function CreatePage() {
                         required
                         max={new Date().toISOString().slice(0, 16)}
                       />
-                      <p className="text-sm text-[#666666]">请填写公历出生时间，系统会自动转换为农历进行八字计算</p>
+                      <p className="text-sm text-[#666666]">请填写公历出生时间，系统会自动转换为农历进行八字计算，若您不确定出生时间，请填写12:00，但可能影响结果</p>
                     </div>
                   </div>
                 </div>
@@ -705,7 +705,7 @@ export default function CreatePage() {
                   </div>
 
                   <div className="mt-6 w-full max-w-md">
-                    <h3 className="text-xl font-bold mb-4">问题2：您最近三个月常遇到以下哪些状况？</h3>
+                    <h3 className="text-xl font-bold mb-4">问题2：您最近三个月常遇到以下哪项状况？</h3>
                     <RadioGroup
                       value={formData.correctiveSituation}
                       onValueChange={(value) => handleSingleSelectChange('correctiveSituation', value)}

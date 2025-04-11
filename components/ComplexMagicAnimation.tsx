@@ -73,13 +73,11 @@ const ComplexMagicAnimation: React.FC<ComplexMagicAnimationProps> = ({ selectedC
   const getPhaseText = () => {
     switch (animationPhase) {
       case 0:
-        return "“我接受命运的馈赠”"
+        return "为生活注入肯定信念"
       case 1:
-        return "“我感受到自然的力量”"
+        return "我本俱足，自然丰盛"
       case 2:
-        return "“我看见心目中的美好生活”"
-      case 3:
-        return "“我成功清理了负能量”"
+        return "我成功清理了负能量"
       default:
         return "万物有主，心光自现"
     }

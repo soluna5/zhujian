@@ -214,10 +214,11 @@ export const generateBeadLayout = ({ size, destinyStones, functionalStones, corr
     }
     
     case "small": {
-      // 细手链：44颗珠子，第一组4颗（修正石，修正石，命运石，修正石），第二组40颗（20功能石，20命运石）
+      // 细手链：44颗珠子，第一组4颗（修正石，修正石，命运石，修正石），第二组38颗（19功能石，19命运石），28号位置为修正石
       const totalBeads = 44;
       const firstGroupSize = 4;
-      const secondGroupSize = 40;
+      const secondGroupSize = 38; // 改为38颗，因为要减去28号位置的修正石和第一组中的命运石
+      const specialPosition = 28; // 特殊位置：28号位置为修正石
       
       // 创建最终的珠子数组
       const beads: Bead[] = [];
@@ -255,20 +256,30 @@ export const generateBeadLayout = ({ size, destinyStones, functionalStones, corr
       ];
       beads.push(...firstGroup);
       
-      // 生成第二组珠子的位置数组
-      const positions = Array.from({ length: secondGroupSize }, (_, i) => i + firstGroupSize);
+      // 生成第二组珠子的位置数组（排除28号位置）
+      const positions = Array.from({ length: secondGroupSize + 1 }, (_, i) => i + firstGroupSize)
+        .filter(pos => pos !== specialPosition);
       
-      // 随机选择前20个位置作为功能石位置
+      // 随机选择前19个位置作为功能石位置
       const shuffledPositions = [...positions];
       for (let i = shuffledPositions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledPositions[i], shuffledPositions[j]] = [shuffledPositions[j], shuffledPositions[i]];
       }
       
-      // 前20个位置为功能石，后20个位置为命运石
+      // 前19个位置为功能石，后19个位置为命运石
       const functionalPositions = new Set(shuffledPositions.slice(0, secondGroupSize / 2));
       
-      // 填充第二组珠子
+      // 添加28号位置的修正石
+      beads.push({
+        position: specialPosition,
+        type: "correction",
+        shape: "round",
+        code: correctiveStone.id,
+        imageUrl: correctiveStone.images.round
+      });
+      
+      // 填充第二组珠子（除了28号位置）
       positions.forEach(pos => {
         const bead: Bead = {
           position: pos,
