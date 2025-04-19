@@ -52,8 +52,8 @@ function scoreCrystal(
       console.log(`水晶 ${crystal.name} 匹配第一个喜用神 ${validFavorableElements[0]}，给予200分`);
       destinyScore = 200;
     } else if (crystalElements[0] === validFavorableElements[1]) {
-      console.log(`水晶 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予170分`);
-      destinyScore = 170;
+      console.log(`水晶 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予160分`);
+      destinyScore = 160;
     } else {
       console.log(`水晶 ${crystal.name} 不匹配任何喜用神，直接排除`);
       return { score: -1000, details: { '命理分数': -1000 } };
@@ -105,26 +105,6 @@ function scoreCrystal(
       situation,
       healthIssue
     });
-    
-    // 检查水晶的支持元素是否匹配喜用神
-    const crystalElements = crystal.destinyAttributes.supportiveElements;
-    const validFavorableElements = favorableElements.filter(element => element !== 'undefined');
-    
-    // 修正石也需要匹配喜用神
-    let destinyScore = 0;
-    if (crystalElements[0] === validFavorableElements[0]) {
-      console.log(`修正石 ${crystal.name} 匹配第一个喜用神 ${validFavorableElements[0]}，给予200分`);
-      destinyScore = 200;
-    } else if (crystalElements[0] === validFavorableElements[1]) {
-      console.log(`修正石 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予170分`);
-      destinyScore = 170;
-    } else {
-      console.log(`修正石 ${crystal.name} 不匹配任何喜用神，直接排除`);
-      return { score: -1000, details: { '命理分数': -1000 } };
-    }
-    
-    details['命理分数'] = destinyScore;
-    totalScore += destinyScore;
     
     // 修正分数计算
     let correctiveScore = 0;
@@ -201,8 +181,8 @@ function scoreDestinyCrystal(
     console.log(`命运石 ${crystal.name} 匹配第一个喜用神 ${validFavorableElements[0]}，给予200分`);
     totalScore = 200;
   } else if (crystalElements[0] === validFavorableElements[1]) {
-    console.log(`命运石 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予170分`);
-    totalScore = 170;
+    console.log(`命运石 ${crystal.name} 匹配第二个喜用神 ${validFavorableElements[1]}，给予160分`);
+    totalScore = 160;
   } else {
     console.log(`命运石 ${crystal.name} 不匹配任何喜用神，直接排除`);
     return { score: -1000, details: { '命理分数': -1000 } };
