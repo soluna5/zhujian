@@ -1232,5 +1232,61 @@ export const crystalData: Crystal[] = [
       }
     },
     incompatibleWith: ["黑曜石"]
+  },
+
+  // 绿草莓晶
+  {
+    id: "green_strawberry_quartz",
+    name: "绿草莓晶",
+    description: "绿草莓晶是一种充满活力的水晶，能增强使用者的创造力和表达能力。绿草莓晶可以激发灵感，帮助突破思维局限，是艺术创作和创新的理想伴侣。它还能增强自信心和决断力，帮助使用者更好地表达自己的想法。",
+    images: {
+      spacer: "/images/crystals/green_strawberry_quartz/spacer.png",
+      round: "/images/crystals/green_strawberry_quartz/round.png",
+      raw: "/images/crystals/green_strawberry_quartz/raw.png"
+    },
+    destinyAttributes: {
+      supportiveElements: ["木"],
+      unsupportiveElements: ["土"]
+    },
+    functionalAttributes: {
+      primaryPurposes: {
+        relationship: true,
+        balance: false,
+        protection: false,
+        wealth: false,
+        career: false
+      },
+      impressions: {
+        warm: true,
+        charming: false,
+        reliable: false,
+        insightful: false
+      },
+    },
+    correctiveAttributes: {
+      correctiveProperties: {
+        socialDrain: true,
+        energySensitive: false,
+        fatigue: false,
+        indecisive: false
+      },
+      potentials: {
+        empathy: true,
+        expression: false,
+        decision: false,
+        intuition: false,
+        efficiency: false
+      },
+      healthIssues: {
+        mood: true,
+        hormonal: false,
+        stress: false,
+        sleep: false,
+        immunity: false,
+        circulation: false,
+        respiratory: false
+      }
+    },
+    incompatibleWith: ["黑碧玺"]
   }
 ]; 
